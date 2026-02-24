@@ -8,6 +8,7 @@
 
 bool matrix[MAX_EQ][MAX_VAR + 1]; // Matrice: coefficienti + termine noto
 int n, k; // n equazioni, k variabili
+bool stamp = true;
 
 void printSolution(bool *solution) {
     printf("Soluzione trovata:\n");
@@ -62,8 +63,10 @@ bool gaussianElimination() {
                 for (int j = col; j <= k; j++) {
                     matrix[row][j] ^= matrix[rank][j]; //XOR tra pivot e colonna da eliminare, dato che le variabili sono booleane fare xor elemento per elemento corrisponde ad un'eliminazione
                 }
-                printf("sottraggo alla riga %d la riga %d \n", row, rank);
-                printMatrix(matrix, n, k);
+                if(stamp){
+                    printf("sottraggo alla riga %d la riga %d \n", row, rank);
+                    printMatrix(matrix, n, k);
+                }
             }
         }
 
