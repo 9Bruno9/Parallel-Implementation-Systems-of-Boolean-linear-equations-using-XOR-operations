@@ -1,6 +1,6 @@
 setwd("C:/Users/Bruno/Desktop/Uni-parallele/Parallel-Implementation-Systems-of-Boolean-linear-equations-using-XOR-operations/test")
-n = 5;
-k = 9;
+n = 1e02;
+k = 1e02;
 
 theta = 0.5;
 
@@ -17,4 +17,4 @@ for (x in 1:k) {
 
 
 # Salva la matrice in un file di testo
-write.table(matrice, file = "test2.txt", row.names = FALSE, col.names = FALSE, sep = " ")
+write.table(matrice, file = "test4.txt", row.names = FALSE, col.names = FALSE, sep = " ")

@@ -4,22 +4,20 @@
 #include <string.h>
  
 #define MAX_VAR 100
-#define MAX_EQ 100
 
-bool matrix[MAX_EQ][MAX_VAR + 1]; // Matrice: coefficienti + termine noto
-int n, k; // n equazioni, k variabili
 bool stamp = true;
 
-void printSolution(bool *solution) {
+void printSolution(bool *solution, int n, int k) {
     printf("Soluzione trovata:\n");
     for (int i = 0; i < k; i++) {
         printf("x%d = %d\n", i + 1, solution[i]);
     }
 }
-
-void printMatrix(bool matrice[MAX_EQ][MAX_VAR+1], int n, int k){
+/*
+void printMatrix( int n, int k, bool matrice[n][k]){
+    
     for(int i = 0 ; i<n; i++){
-        for(int j =0; j<k+1; j++){
+        for(int j =0; j<3; j++){
             printf("%d ", matrice[i][j]);
             if(j==k-1) printf("| ");
         }
@@ -28,7 +26,21 @@ void printMatrix(bool matrice[MAX_EQ][MAX_VAR+1], int n, int k){
     printf("\n");
 }
 
-bool gaussianElimination() {
+*/
+
+void printMatrix(int n, int k, bool matrice[n][k]) {
+    for(int i = 0; i < n; i++) {
+        for(int j = 0; j < k; j++) { // Stampa tutti i k valori per riga
+            printf("%d ", matrice[i][j]);
+            if(j == k-1) printf("| ");
+        }
+        printf("\n");
+    }
+    printf("\n");
+}
+
+
+bool gaussianElimination(int n, int k, bool matrix[n][k]) {
     int rank = 0;
     bool solution[MAX_VAR] = {false};
 
@@ -51,10 +63,10 @@ bool gaussianElimination() {
                 matrix[rank][j] = matrix[pivot][j];
                 matrix[pivot][j] = temp;
             }
-
-            printf("Scambio la riga %d con la riga %d \n", rank, pivot);
-            printMatrix(matrix, n, k);
-
+            if(stamp){
+                printf("Scambio la riga %d con la riga %d \n", rank, pivot);
+                printMatrix( n, k, matrix);
+            }
         }
 
         // Elimina la colonna sotto il pivot
@@ -65,7 +77,7 @@ bool gaussianElimination() {
                 }
                 if(stamp){
                     printf("sottraggo alla riga %d la riga %d \n", row, rank);
-                    printMatrix(matrix, n, k);
+                    printMatrix( n, k, matrix);
                 }
             }
         }
@@ -73,7 +85,7 @@ bool gaussianElimination() {
         rank++;
         
     }
-    printf("rank è pari a %d", rank);
+    //printf("rank è pari a %d", rank);
 
     // Controlla se il sistema è risolvibile
     for (int row = rank; row < n; row++) {
@@ -92,13 +104,15 @@ bool gaussianElimination() {
         }
     }
 
-    printSolution(solution);
+    printSolution(solution, n, k);
     return true;
 }
 
 int main(int argc, char *argv[]) {
-    if (argc != 2) {
-        printf("Uso: %s <nome_file>\n", argv[0]);
+
+
+    if (argc < 2) {
+        printf("Uso: %s <nome_file> \n", argv[0]);
         return 1;
     }
 
@@ -108,10 +122,12 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
+
+
     // Leggi il file per determinare n e k
     char line[MAX_VAR * 2 + 2]; // Buffer per leggere ogni riga
-    n = 0;
-    k = 0;
+    int n = 0;
+    int k = 0;
 
     // Prima passata: conta il numero di righe (n) e il numero di colonne (k)
     while (fgets(line, sizeof(line), file) != NULL) {
@@ -123,7 +139,7 @@ int main(int argc, char *argv[]) {
         }
         if (count > 0) {
             if (k == 0) {
-                k = count - 1; // L'ultima colonna è il termine noto
+                k = count ; // L'ultima colonna è il termine noto
             }
             n++;
         }
@@ -132,20 +148,22 @@ int main(int argc, char *argv[]) {
     // Resetta il puntatore del file all'inizio
     rewind(file);
 
+    bool matrice[n][k];
+     
     // Leggi la matrice
     for (int i = 0; i < n; i++) {
-        for (int j = 0; j <= k; j++) {
+        for (int j = 0; j < k; j++) {
             int val;
             fscanf(file, "%d", &val);
-            matrix[i][j] = (bool)val;
+            matrice[i][j] = (bool)val;
         }
     }
 
     fclose(file);
 
-    printMatrix(matrix, n, k);
+    printMatrix(n, k, matrice);
 
-    if (!gaussianElimination()) {
+    if (!gaussianElimination(n, k, matrice)) {
         return 1;
     }
 
