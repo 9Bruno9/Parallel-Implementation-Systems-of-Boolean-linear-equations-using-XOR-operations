@@ -18,14 +18,14 @@ int main() {
 
     // Definisci i range per n e k
     int n_values[] = {100, 200, 300, 400, 500};
-    int k_values[] = {100, 200, 300, 400, 500};
-    double theta = 0.5;
+    //int k_values[] = {100, 200, 300, 400, 500};
+    double theta = 0.2;
 
     // Cicla su diversi valori di n e k
     for (int i = 0; i < sizeof(n_values)/sizeof(n_values[0]); i++) {
-        for (int j = 0; j < sizeof(k_values)/sizeof(k_values[0]); j++) {
+      //  for (int j = 0; j < sizeof(k_values)/sizeof(k_values[0]); j++) {
             int n = n_values[i];
-            int k = k_values[j];
+            int k = n_values[i];
 
             // Alloca la matrice
             bool **matrix = (bool **)malloc(n * sizeof(bool *));
@@ -34,7 +34,6 @@ int main() {
             }
 
             // Genera la matrice
-            srand(42);
             matrix_generator(n, k, theta, matrix);
 
             // Misura il tempo di esecuzione
@@ -55,7 +54,7 @@ int main() {
             // Stampa il risultato (opzionale)
             printf("n=%d, k=%d, theta=%f, Tempo: %f secondi, Risultato: %d\n", n, k, theta, tempo_esecuzione, result);
         }
-    }
+    
 
     // Chiudi il file CSV
     fclose(csv_file);

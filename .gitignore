@@ -1,0 +1,7 @@
+# File oggetto
+*.o
+
+# File senza estensione (eseguibili)
+*
+!*.*
+!*/

@@ -65,16 +65,25 @@ bool gaussianElimination(int n, int k, bool **matrix) {
 
 
 
+
     for (int i = rank - 1; i >= 0; i--) {
-        
-        solution[i] = matrix[i][k-1];
-     
-        for (int j = i + 1; j < k; j++) { // scorro tutte le variabili già risolte moltiplico (AND) il valore con il coefficiente 
-            solution[i] ^= (matrix[i][j] && solution[j]); // é come spostare variabili a dx dell'equazione somma o sottrazione è sempre XOR
-            
+        int piv;
+        for(int m = 0; m < k; m++)
+        {
+            if(matrix[i][m])
+            {
+                piv = m;
+                break;
+            }
         }
 
+        solution[piv] = matrix[i][k-1];
+     
+        for (int j = piv + 1; j < k; j++) { // scorro tutte le variabili già risolte moltiplico (AND) il valore con il coefficiente 
+            solution[piv] ^= (matrix[i][j] && solution[j]); // é come spostare variabili a dx dell'equazione somma o sottrazione è sempre XOR
+            
+        }
     }
 
-    return true;
+    return solution;
 }

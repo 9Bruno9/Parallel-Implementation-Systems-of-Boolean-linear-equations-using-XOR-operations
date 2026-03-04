@@ -4,8 +4,8 @@
 
 void matrix_generator(int n, int k, double theta, bool **matrix) {
     // Inizializza il generatore di numeri casuali
-    srand(time(NULL));
-
+    //srand(time(NULL));
+    srand(42);
     // Riempie la matrice con 0 e 1 casuali
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < k; j++) {

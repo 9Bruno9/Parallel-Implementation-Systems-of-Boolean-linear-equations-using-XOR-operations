@@ -77,7 +77,7 @@ bool gaussianElimination(int n, int k, bool matrix[n][k]) {
         // Elimina la colonna sotto il pivot
         for (int row = rank + 1; row < n; row++) {
             if (matrix[row][col]) {
-                for (int j = col; j < k; j++) { //!!!!<=
+                for (int j = col; j < k; j++) { 
                     matrix[row][j] ^= matrix[rank][j]; //XOR tra pivot e colonna da eliminare, dato che le variabili sono booleane fare xor elemento per elemento corrisponde ad un'eliminazione
                 }
                 if(stamp){
@@ -107,23 +107,26 @@ bool gaussianElimination(int n, int k, bool matrix[n][k]) {
 
 
     for (int i = rank - 1; i >= 0; i--) {
-        
-        solution[i] = matrix[i][k-1];
+        int piv;
+        for(int m = 0; m < k; m++)
+        {
+            if(matrix[i][m])
+            {
+                piv = m;
+                break;
+            }
+        }
+        printf("piv %d \n", piv);
+        solution[piv] = matrix[i][k-1];
      
-        for (int j = i + 1; j < k; j++) { // scorro tutte le variabili già risolte moltiplico (AND) il valore con il coefficiente 
-            solution[i] ^= (matrix[i][j] && solution[j]); // é come spostare variabili a dx dell'equazione somma o sottrazione è sempre XOR
+        for (int j = piv + 1; j < k; j++) { // scorro tutte le variabili già risolte moltiplico (AND) il valore con il coefficiente 
+            solution[piv] ^= (matrix[i][j] && solution[j]); // é come spostare variabili a dx dell'equazione somma o sottrazione è sempre XOR
             
         }
-
-        /*for(int n=0; n<k-1; n++){
-            printf("x%d = %d " , n+1, solution[n]);
-        }
-        printf("\n");
-        */
     }
 
     printSolution(solution, n, k);
-    return true;
+    return solution;
 }
 
 int main(int argc, char *argv[]) {
