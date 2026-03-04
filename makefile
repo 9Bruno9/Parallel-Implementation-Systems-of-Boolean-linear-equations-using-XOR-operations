@@ -3,11 +3,16 @@ NVCC = nvcc
 TARGETS = tester SerialeDemo
 
 
-run: main.cu seriale.c matrix_generator.c
+main: main.cu seriale.c matrix_generator.c
 	gcc -c matrix_generator.c -o matrix_generator.o
 	gcc -c seriale.c -o seriale.o
-	$(NVCC) -o tester.o main.cu seriale.o matrix_generator.o 
-	./tester.o
+	$(NVCC) -o tester main.cu seriale.o matrix_generator.o 
+	
+run_seriale: tester
+	./tester versione_seriale	
+
+
+
 
 
 run_test: SerialeDemo.c
