@@ -7,7 +7,7 @@
 
 bool gaussianElimination(int n, int k, bool **matrix) {
     int rank = 0;
-    bool solution[k];
+    bool solution[k-1];
     for (int i = 0; i < k; i++) {
             solution[i] = false;
     }

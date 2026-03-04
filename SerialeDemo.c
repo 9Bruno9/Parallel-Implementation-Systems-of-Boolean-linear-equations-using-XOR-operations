@@ -9,7 +9,7 @@ bool stamp = true;
 
 void printSolution(bool *solution, int n, int k) {
     printf("Soluzione trovata:\n");
-    for (int i = 0; i < k; i++) {
+    for (int i = 0; i < k-1; i++) {
         printf("x%d = %d\n", i + 1, solution[i]);
     }
 }
@@ -42,13 +42,14 @@ void printMatrix(int n, int k, bool matrice[n][k]) {
 
 bool gaussianElimination(int n, int k, bool matrix[n][k]) {
     int rank = 0;
-    bool solution[k];
+    
+    bool solution[k-1];
     for (int i = 0; i < k; i++) {
     solution[i] = false;
     }
 
 
-    for (int col = 0; col < k && rank < n; col++) {
+    for (int col = 0; col < k-1 && rank < n; col++) { //scorre per colonna per cercare il pivot
         // Trova il pivot
         int pivot = -1;
         for (int row = rank; row < n; row++) {
@@ -62,7 +63,7 @@ bool gaussianElimination(int n, int k, bool matrix[n][k]) {
 
         // Scambia la riga del pivot con la riga corrente
         if (pivot != rank) {
-            for (int j = 0; j <= k; j++) {
+            for (int j = 0; j < k; j++) {  //!!!! <=
                 bool temp = matrix[rank][j];
                 matrix[rank][j] = matrix[pivot][j];
                 matrix[pivot][j] = temp;
@@ -76,7 +77,7 @@ bool gaussianElimination(int n, int k, bool matrix[n][k]) {
         // Elimina la colonna sotto il pivot
         for (int row = rank + 1; row < n; row++) {
             if (matrix[row][col]) {
-                for (int j = col; j <= k; j++) {
+                for (int j = col; j < k; j++) { //!!!!<=
                     matrix[row][j] ^= matrix[rank][j]; //XOR tra pivot e colonna da eliminare, dato che le variabili sono booleane fare xor elemento per elemento corrisponde ad un'eliminazione
                 }
                 if(stamp){
@@ -89,23 +90,36 @@ bool gaussianElimination(int n, int k, bool matrix[n][k]) {
         rank++;
         
     }
-    //printf("rank è pari a %d", rank);
+    printf("rank è pari a %d\n", rank);
 
     // Controlla se il sistema è risolvibile
     for (int row = rank; row < n; row++) {
-        if (matrix[row][k]) {
+
+        if (matrix[row][k-1]) {
+            
             printf("Sistema irrisolvibile.\n");
             return false;
         }
     }
 
     // Back substitution
+
+
+
     for (int i = rank - 1; i >= 0; i--) {
-        solution[i] = matrix[i][k];
+        
+        solution[i] = matrix[i][k-1];
      
         for (int j = i + 1; j < k; j++) { // scorro tutte le variabili già risolte moltiplico (AND) il valore con il coefficiente 
             solution[i] ^= (matrix[i][j] && solution[j]); // é come spostare variabili a dx dell'equazione somma o sottrazione è sempre XOR
+            
         }
+
+        /*for(int n=0; n<k-1; n++){
+            printf("x%d = %d " , n+1, solution[n]);
+        }
+        printf("\n");
+        */
     }
 
     printSolution(solution, n, k);
