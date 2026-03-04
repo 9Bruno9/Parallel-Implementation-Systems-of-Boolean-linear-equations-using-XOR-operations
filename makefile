@@ -6,12 +6,14 @@ TARGETS = tester SerialeDemo
 main: main.cu seriale.c matrix_generator.c
 	gcc -c matrix_generator.c -o matrix_generator.o
 	gcc -c seriale.c -o seriale.o
-	$(NVCC) -o tester main.cu seriale.o matrix_generator.o 
+	nvcc -c  parallel1.cu -o parallel1.o
+	$(NVCC) -o tester main.cu seriale.o matrix_generator.o parallel1.o
 	
 run_seriale: tester
 	./tester versione_seriale	
 
-
+run_par1: tester
+	./tester versione_p1
 
 
 

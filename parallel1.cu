@@ -5,6 +5,8 @@
 #include <stdbool.h>
 #include <string.h>
 #include <vector>
+#include "parallel1.h"
+
 
 #define CHECK(call) \
 { \

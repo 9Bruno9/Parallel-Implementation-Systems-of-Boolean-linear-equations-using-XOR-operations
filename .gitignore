@@ -1,6 +1,8 @@
 # File oggetto
 *.o
 
+*.csv
+
 # File senza estensione (eseguibili)
 *
 !*.*
