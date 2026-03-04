@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
  
-#define MAX_VAR 100
+
 
 bool stamp = true;
 
@@ -32,7 +32,7 @@ void printMatrix(int n, int k, bool matrice[n][k]) {
     for(int i = 0; i < n; i++) {
         for(int j = 0; j < k; j++) { // Stampa tutti i k valori per riga
             printf("%d ", matrice[i][j]);
-            if(j == k-1) printf("| ");
+            if(j == k-2) printf("| ");
         }
         printf("\n");
     }
@@ -42,7 +42,11 @@ void printMatrix(int n, int k, bool matrice[n][k]) {
 
 bool gaussianElimination(int n, int k, bool matrix[n][k]) {
     int rank = 0;
-    bool solution[MAX_VAR] = {false};
+    bool solution[k];
+    for (int i = 0; i < k; i++) {
+    solution[i] = false;
+    }
+
 
     for (int col = 0; col < k && rank < n; col++) {
         // Trova il pivot
@@ -125,7 +129,7 @@ int main(int argc, char *argv[]) {
 
 
     // Leggi il file per determinare n e k
-    char line[MAX_VAR * 2 + 2]; // Buffer per leggere ogni riga
+    char line[100 * 2 + 2]; // Buffer per leggere ogni riga
     int n = 0;
     int k = 0;
 
