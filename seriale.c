@@ -54,11 +54,7 @@ bool gaussianElimination(int n, int k, bool **matrix) {
     // Controlla se il sistema è risolvibile
     for (int row = rank; row < n; row++) {
 
-        if (matrix[row][k-1]) {
-            
-            
-            return false;
-        }
+        if (matrix[row][k-1]) { return false; }
     }
 
     // Back substitution

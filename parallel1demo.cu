@@ -76,6 +76,12 @@ bool gaussianEliminationCuda1(uint8_t* h_matrix, int n, int k, uint8_t* solution
     }
 
 
+    for (int row = rank; row < n; row++) {
+        if (h_matrix[row*k+k-1]) {
+            cudaFree(d_matrix); 
+            return false; }
+    }
+    /*
     for (int i = rank; i < n; i++)
     {
         bool allZero = true;
@@ -94,7 +100,7 @@ bool gaussianEliminationCuda1(uint8_t* h_matrix, int n, int k, uint8_t* solution
             cudaFree(d_matrix);
             return false;
         }
-    }
+    }*/
 
     // Back substitution (CPU)
 
