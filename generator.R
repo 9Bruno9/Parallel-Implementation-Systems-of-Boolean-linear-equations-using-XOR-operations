@@ -51,7 +51,6 @@ identical(data_p1$result, data_ser$result)
 identical(data_p2$result, data_ser$result)
 identical(data_p1$result, data_p2$result)
 
-setdiff(data_p2$result, data_ser$result)
 
 
 

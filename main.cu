@@ -12,7 +12,7 @@
 #include "parallel1.h"
 #include "parallel2.h"
 
-#define N_TRY 15
+#define N_TRY 20
 
 int main(int argc, char *argv[]) {
 
@@ -105,11 +105,7 @@ int main(int argc, char *argv[]) {
                     // Scrivi i risultati sul file CSV
                     fprintf(csv_file, "%d,%d,%f,%f,%d\n", n, k, theta, tempo_esecuzione, result);
 
-                    // Libera la memoria
-                    for (int x = 0; x < n; x++) {
-                        free(matrix[x]);
-                    }
-                    free(matrix);
+                    
 
                     printf("n=%d, k=%d, theta=%f, Tempo: %f secondi, Risultato: %d\n", n, k, theta, tempo_esecuzione, result);
                 }
