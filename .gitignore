@@ -1,9 +1,4 @@
-# File oggetto
+# file oggetto
 *.o
 
-*.csv
-
-# File senza estensione (eseguibili)
-*
-!*.*
-!*/
+# dataset
