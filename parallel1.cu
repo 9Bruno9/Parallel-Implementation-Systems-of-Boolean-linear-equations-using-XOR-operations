@@ -18,7 +18,7 @@
 }
 
 
-// KERNEL CUDA: elimina righe sotto il pivot
+// elimina righe sotto il pivot, ogni thread si occupa di una riga ed eventualmente esegue XOR
 __global__ void rowsElimination(uint8_t* matrix, int n,int k,int pivotRow,int pivotCol)
 {
     int row = blockIdx.x * blockDim.x + threadIdx.x;
@@ -77,37 +77,22 @@ bool gaussianEliminationCuda1(uint8_t* h_matrix, int n, int k, uint8_t* solution
         rank++;
     }
 
-
-    for (int i = rank; i < n; i++)
-    {
-        bool allZero = true;
-
-        for (int j = 0; j < vars; j++)
-        {
-            if (h_matrix[i*k + j])
-            {
-                allZero = false;
-                break;
-            }
-        }
-
-        if (allZero && h_matrix[i*k + vars])
-        {
-            cudaFree(d_matrix);
-            return false;
-        }
+    //controllo esistano soluzioni
+    for (int row = rank; row < n; row++) {
+        if (h_matrix[row*k+k-1]) {
+            cudaFree(d_matrix); 
+            return false; }
     }
 
     // Back substitution (CPU)
 
-    for (int i = 0; i < vars; i++)
-        solution[i] = 0;
+    for (int i = 0; i < vars; i++) {solution[i] = 0;}
 
     for (int i = rank - 1; i >= 0; i--)
     {
         int pivotCol = -1;
 
-        for (int j = 0; j < vars; j++)
+        for (int j = 0; j < vars; j++) //scorro da x0 a xn finché non trovo un 1 
         {
             if (h_matrix[i*k + j])
             {
@@ -119,12 +104,11 @@ bool gaussianEliminationCuda1(uint8_t* h_matrix, int n, int k, uint8_t* solution
         if (pivotCol == -1)
             continue;
 
-        solution[pivotCol] = h_matrix[i*k + vars];
+        solution[pivotCol] = h_matrix[i*k + vars]; //assegno al valore di quella pivot col il termine noto corrispondente
 
-        for (int j = pivotCol + 1; j < vars; j++)
+        for (int j = pivotCol + 1; j < vars; j++) //scorro tutte le altre variabili e se coeff==1 aggiungo il loro valore
         {
-            if (h_matrix[i*k + j])
-                solution[pivotCol] ^= solution[j];
+            if (h_matrix[i*k + j]) { solution[pivotCol] ^= solution[j];}
         }
     }
 

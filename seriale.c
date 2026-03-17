@@ -7,11 +7,8 @@
 
 bool gaussianElimination(int n, int k, bool **matrix, bool *solution) {
     int rank = 0;
-    
-    
-    for (int i = 0; i < k-1; i++) {
-    solution[i] = false;
-    }
+
+    for (int i = 0; i < k-1; i++) { solution[i] = false; }
 
 
     for (int col = 0; col < k-1 && rank < n; col++) { //scorre per colonna per cercare il pivot

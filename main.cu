@@ -12,7 +12,7 @@
 #include "parallel1.h"
 #include "parallel2.h"
 
-#define N_TRY 10
+#define N_TRY 45
 
 int main(int argc, char *argv[]) {
     
