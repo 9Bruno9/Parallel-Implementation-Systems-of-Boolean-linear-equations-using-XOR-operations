@@ -12,7 +12,7 @@
 #include "parallel1.h"
 #include "parallel2.h"
 
-#define N_TRY 40
+#define N_TRY 10
 
 int main(int argc, char *argv[]) {
     
@@ -91,8 +91,9 @@ int main(int argc, char *argv[]) {
                 // Misura il tempo di esecuzione
                 
                 if(strcmp(input_string, "versione_seriale") == 0){
+                    bool *solution = (bool *)malloc((k-1) * sizeof(bool));
                     start = clock();
-                    result = gaussianElimination(n, k, matrix);
+                    result = gaussianElimination(n, k, matrix, solution);
                     end = clock();
                     tempo_esecuzione = ((double)(end - start)) / CLOCKS_PER_SEC;
 
@@ -102,6 +103,7 @@ int main(int argc, char *argv[]) {
                     
 
                     printf("n=%d, k=%d, theta=%f, Tempo: %f secondi, Risultato: %d\n", n, k, theta, tempo_esecuzione, result);
+                    free(solution);
                 }
                 else if(strcmp(input_string, "versione_p1") == 0){
                     uint8_t *h_matrix = (uint8_t *)malloc(n * k * sizeof(uint8_t));

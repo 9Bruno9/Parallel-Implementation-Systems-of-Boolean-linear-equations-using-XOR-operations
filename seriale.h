@@ -7,7 +7,7 @@
 extern "C" {
 #endif
 
-bool gaussianElimination(int n, int k, bool **matrix);
+bool gaussianElimination(int n, int k, bool **matrix, bool *solution);
 
 #ifdef __cplusplus
 }

@@ -5,11 +5,11 @@
 #include "seriale.h"
 
 
-bool gaussianElimination(int n, int k, bool **matrix) {
+bool gaussianElimination(int n, int k, bool **matrix, bool *solution) {
     int rank = 0;
     
-    bool solution[k-1];
-    for (int i = 0; i < k; i++) {
+    
+    for (int i = 0; i < k-1; i++) {
     solution[i] = false;
     }
 
@@ -59,9 +59,6 @@ bool gaussianElimination(int n, int k, bool **matrix) {
 
     // Back substitution
 
-
-
-
     for (int i = rank - 1; i >= 0; i--) {
         int piv;
         for(int m = 0; m < k; m++)
@@ -75,11 +72,11 @@ bool gaussianElimination(int n, int k, bool **matrix) {
 
         solution[piv] = matrix[i][k-1];
      
-        for (int j = piv + 1; j < k; j++) { // scorro tutte le variabili già risolte moltiplico (AND) il valore con il coefficiente 
+        for (int j = piv + 1; j < k-1; j++) { // scorro tutte le variabili già risolte moltiplico (AND) il valore con il coefficiente 
             solution[piv] ^= (matrix[i][j] && solution[j]); // é come spostare variabili a dx dell'equazione somma o sottrazione è sempre XOR
             
         }
     }
 
-    return solution;
+    return true;
 }

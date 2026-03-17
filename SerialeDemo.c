@@ -4,6 +4,32 @@
 #include <string.h>
 #include "seriale.h"
 
+
+
+
+bool stamp = true;
+
+void printSolution(bool *solution, int n, int k) {
+    printf("Soluzione trovata:\n");
+    for (int i = 0; i < k-1; i++) {
+        printf("x%d = %d\n", i + 1, solution[i]);
+    }
+}
+
+
+void printMatrix(int n, int k, bool **matrice){
+    for(int i = 0; i < n; i++) {
+        for(int j = 0; j < k; j++) { // Stampa tutti i k valori per riga
+            printf("%d ", matrice[i][j]);
+            if(j == k-2) printf("| ");
+        }
+        printf("\n");
+    }
+    printf("\n");
+}
+
+
+
 int main(int argc, char *argv[]) {
 
 
@@ -44,8 +70,10 @@ int main(int argc, char *argv[]) {
     // Resetta il puntatore del file all'inizio
     rewind(file);
 
-    bool **matrix = (bool **)malloc(n * sizeof(bool *));
-     
+    bool **matrice = (bool **)malloc(n * sizeof(bool *));
+    for (int x = 0; x < n; x++) {
+        matrice[x] = (bool *)malloc(k * sizeof(bool));
+    }
     // Leggi la matrice
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < k; j++) {
@@ -59,9 +87,14 @@ int main(int argc, char *argv[]) {
 
     printMatrix(n, k, matrice);
 
-    if (!gaussianElimination(n, k, matrice)) {
-        return 1;
+    bool *solution = malloc((k-1) * sizeof(bool));
+
+    if (!gaussianElimination(n, k, matrice, solution)) {
+        printf("sistema irrisolvibile \n");
+        return 0;
     }
+
+    printSolution(solution, n, k);
 
     return 0;
 }
