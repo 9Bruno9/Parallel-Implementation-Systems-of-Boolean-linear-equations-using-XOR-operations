@@ -27,14 +27,14 @@ run_test: SerialeDemo.c
 	./SerialeDemo ./test/test4.txt
 
 run_test_CUDA1: parallel1demo.cu
-	$(NVCC) -o parallel1demo parallel1demo.cu
+	$(NVCC) -o parallel1demo parallel1demo.cu parallel1.o
 	./parallel1demo ./test/test1.txt
 	./parallel1demo ./test/test2.txt
 	./parallel1demo ./test/test3.txt
 	./parallel1demo ./test/test4.txt
 
 run_test_CUDA2: parallel2demo.cu
-	$(NVCC) -o parallel2demo parallel2demo.cu
+	$(NVCC) -o parallel2demo parallel2demo.cu parallel2.o
 	./parallel2demo ./test/test1.txt
 	./parallel2demo ./test/test2.txt
 	./parallel2demo ./test/test3.txt
