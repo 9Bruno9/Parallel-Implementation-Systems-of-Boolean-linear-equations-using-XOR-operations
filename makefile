@@ -20,7 +20,7 @@ run_par2: tester
 	./tester versione_p2
 
 run_test: SerialeDemo.c
-	$(CC) -o SerialeDemo SerialeDemo.c 
+	$(CC) -o SerialeDemo SerialeDemo.c seriale.o
 	./SerialeDemo ./test/test1.txt
 	./SerialeDemo ./test/test2.txt
 	./SerialeDemo ./test/test3.txt

@@ -2,132 +2,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
- 
-
-
-bool stamp = true;
-
-void printSolution(bool *solution, int n, int k) {
-    printf("Soluzione trovata:\n");
-    for (int i = 0; i < k-1; i++) {
-        printf("x%d = %d\n", i + 1, solution[i]);
-    }
-}
-/*
-void printMatrix( int n, int k, bool matrice[n][k]){
-    
-    for(int i = 0 ; i<n; i++){
-        for(int j =0; j<3; j++){
-            printf("%d ", matrice[i][j]);
-            if(j==k-1) printf("| ");
-        }
-        printf("\n");
-    }
-    printf("\n");
-}
-
-*/
-
-void printMatrix(int n, int k, bool matrice[n][k]) {
-    for(int i = 0; i < n; i++) {
-        for(int j = 0; j < k; j++) { // Stampa tutti i k valori per riga
-            printf("%d ", matrice[i][j]);
-            if(j == k-2) printf("| ");
-        }
-        printf("\n");
-    }
-    printf("\n");
-}
-
-
-bool gaussianElimination(int n, int k, bool matrix[n][k]) {
-    int rank = 0;
-    
-    bool solution[k-1];
-    for (int i = 0; i < k; i++) {
-    solution[i] = false;
-    }
-
-
-    for (int col = 0; col < k-1 && rank < n; col++) { //scorre per colonna per cercare il pivot
-        // Trova il pivot
-        int pivot = -1;
-        for (int row = rank; row < n; row++) {
-            if (matrix[row][col]) {
-                pivot = row;
-                break;
-            }
-        }
-
-        if (pivot == -1) continue; // Colonna nulla
-
-        // Scambia la riga del pivot con la riga corrente
-        if (pivot != rank) {
-            for (int j = 0; j < k; j++) {  //!!!! <=
-                bool temp = matrix[rank][j];
-                matrix[rank][j] = matrix[pivot][j];
-                matrix[pivot][j] = temp;
-            }
-            if(stamp){
-                printf("Scambio la riga %d con la riga %d \n", rank, pivot);
-                printMatrix( n, k, matrix);
-            }
-        }
-
-        // Elimina la colonna sotto il pivot
-        for (int row = rank + 1; row < n; row++) {
-            if (matrix[row][col]) {
-                for (int j = col; j < k; j++) { 
-                    matrix[row][j] ^= matrix[rank][j]; //XOR tra pivot e colonna da eliminare, dato che le variabili sono booleane fare xor elemento per elemento corrisponde ad un'eliminazione
-                }
-                if(stamp){
-                    printf("sottraggo alla riga %d la riga %d \n", row, rank);
-                    printMatrix( n, k, matrix);
-                }
-            }
-        }
-
-        rank++;
-        
-    }
-    printf("rank è pari a %d\n", rank);
-
-    // Controlla se il sistema è risolvibile
-    for (int row = rank; row < n; row++) {
-
-        if (matrix[row][k-1]) {
-            
-            printf("Sistema irrisolvibile.\n");
-            return false;
-        }
-    }
-
-    // Back substitution
-
-
-
-    for (int i = rank - 1; i >= 0; i--) {
-        int piv;
-        for(int m = 0; m < k; m++)
-        {
-            if(matrix[i][m])
-            {
-                piv = m;
-                break;
-            }
-        }
-        printf("piv %d \n", piv);
-        solution[piv] = matrix[i][k-1];
-     
-        for (int j = piv + 1; j < k; j++) { // scorro tutte le variabili già risolte moltiplico (AND) il valore con il coefficiente 
-            solution[piv] ^= (matrix[i][j] && solution[j]); // é come spostare variabili a dx dell'equazione somma o sottrazione è sempre XOR
-            
-        }
-    }
-
-    printSolution(solution, n, k);
-    return solution;
-}
+#include "seriale.h"
 
 int main(int argc, char *argv[]) {
 
@@ -169,7 +44,7 @@ int main(int argc, char *argv[]) {
     // Resetta il puntatore del file all'inizio
     rewind(file);
 
-    bool matrice[n][k];
+    bool **matrix = (bool **)malloc(n * sizeof(bool *));
      
     // Leggi la matrice
     for (int i = 0; i < n; i++) {

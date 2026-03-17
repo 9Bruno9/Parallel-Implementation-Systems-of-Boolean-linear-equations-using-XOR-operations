@@ -91,7 +91,7 @@ bool gaussianEliminationCuda2(uint32_t* h_matrix, int n, int k, uint8_t* solutio
 
         
 
-        int threads = min(n,1024);
+        int threads = min((n + 32 -1)/32 ,1024);
         int blocks = (n + threads - 1) / threads;
 
         rowsElimination2<<<blocks, threads>>>(d_matrix, n, numWords, rank, col);

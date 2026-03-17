@@ -67,7 +67,7 @@ bool gaussianEliminationCuda1(uint8_t* h_matrix, int n, int k, uint8_t* solution
             CHECK(cudaMemcpy(d_matrix, h_matrix, n*k*sizeof(uint8_t), cudaMemcpyHostToDevice));
         }
 
-        int threads = min(n,1024);
+        int threads = 1024;
         int blocks = (n + threads - 1) / threads;
 
         rowsElimination<<<blocks, threads>>>(d_matrix, n, k, rank, col);

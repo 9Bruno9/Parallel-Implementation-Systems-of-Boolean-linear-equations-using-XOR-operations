@@ -12,10 +12,10 @@
 #include "parallel1.h"
 #include "parallel2.h"
 
-#define N_TRY 20
+#define N_TRY 40
 
 int main(int argc, char *argv[]) {
-
+    
     if (argc < 2) {
         printf("Uso: %s <stringa>\n", argv[0]);
         return 1;
@@ -27,14 +27,14 @@ int main(int argc, char *argv[]) {
     // Apri il file CSV per scrivere i risultati
     FILE *csv_file = NULL;
     if(strcmp(input_string, "versione_seriale") == 0){
-         csv_file = fopen("risultati_seriale.csv", "w");
+         csv_file = fopen("result_data/risultati_seriale_01.csv", "w");
         if (!csv_file) {
             perror("Errore nell'apertura del file CSV");
             return 1;
         }
     }
     else if(strcmp(input_string, "versione_p1") == 0){
-        csv_file = fopen("risultati_p1.csv", "w");
+        csv_file = fopen("result_data/risultati_p1_01.csv", "w");
         if (!csv_file) {
             perror("Errore nell'apertura del file CSV");
             return 1;
@@ -42,7 +42,7 @@ int main(int argc, char *argv[]) {
 
     }
     else if(strcmp(input_string, "versione_p2") == 0){
-        csv_file = fopen("risultati_p2.csv", "w");
+        csv_file = fopen("result_data/risultati_p2_01.csv", "w");
         if (!csv_file) {
             perror("Errore nell'apertura del file CSV");
             return 1;
@@ -50,20 +50,14 @@ int main(int argc, char *argv[]) {
 
     }
     else return 1;
-    /*int main() { 
-    // Apri il file CSV per scrivere i risultati 
-    FILE *csv_file = fopen("risultati_seriale.csv", "w"); 
-    if (!csv_file) { 
-        perror("Errore nell'apertura del file CSV"); 
-        return 1; 
-    }*/
 
+    double theta = 0.1;
 
     // Scrivi l'intestazione del file CSV
     fprintf(csv_file, "n,k,theta,tempo_esecuzione, result\n");
 
     // Definisci i range per n e k
- 
+    
     int n_values[N_TRY];
     for(int i=0; i<N_TRY; i++){
         n_values[i]= 100*(i+1);
@@ -71,7 +65,7 @@ int main(int argc, char *argv[]) {
 
 
     //int k_values[] = {100, 200, 300, 400, 500};
-    double theta = 0.4;
+    
      
     clock_t start;
     clock_t end;
