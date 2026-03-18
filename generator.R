@@ -85,7 +85,7 @@ data_p2  <- data_p2 %>% mutate(tipo = "p2")
 data_p3  <- data_p3 %>% mutate(tipo = "p3")
 # Unisci i dataset
 data_all <- bind_rows(data_ser, data_p1, data_p2, data_p3)
-data_all <- bind_rows(data_p2, data_p3)
+#data_all <- bind_rows(data_p2, data_p3)
 
 
 
@@ -96,7 +96,7 @@ ggplot(data_all, aes(x = n^2, y = t_medio, color = tipo)) +
     x = "n^2",
     y = "Tempo medio di esecuzione",
     color = "Tipo esecuzione",
-    title = "Confronto tempi seriale vs p1"
+    title = "Confronto tempi seriale vs p1 vs p2 vs p3; theta = 0.1"
   ) +
   theme_minimal(base_size = 14) # tema pulito
 
@@ -174,5 +174,61 @@ identical(data_p1$result, data_ser$result)
 identical(data_p3$result, data_ser$result)
 
 
+####COMPARISON P1######################################
+
+data_p1 <- read.csv("result_data/risultati_seriale_01.csv")
+data_p2 <-  read.csv("result_data/risultati_seriale_02.csv")
 
 
+data_s1 <-data_s1 %>%
+  group_by(n) %>%
+  summarise(t_medio = mean(tempo_esecuzione))
+
+data_s2 <-data_s2 %>%
+  group_by(n) %>%
+  summarise(t_medio = mean(tempo_esecuzione))
+
+data_s1 <- data_s1 %>% mutate(tipo = "s1")
+data_s2  <- data_s2 %>% mutate(tipo = "s2")
+
+data_all <- bind_rows(data_s1, data_s2)
+
+ggplot(data_all, aes(x = n^2, y = t_medio, color = tipo)) +
+  geom_line(size = 1) +       
+  #geom_point() +                
+  labs(
+    x = "n^2",
+    y = "Tempo medio di esecuzione",
+    color = "Tipo esecuzione",
+    title = "Confronto tempi s_01 vs s_02"
+  ) +
+  theme_minimal(base_size = 14) # tema pulito
+
+
+data_s1 <- read.csv("result_data/risultati_seriale_01.csv")
+data_s2 <-  read.csv("result_data/risultati_seriale_02.csv")
+
+
+data_s1 <-data_s1 %>%
+  group_by(n) %>%
+  summarise(t_medio = mean(tempo_esecuzione))
+
+data_s2 <-data_s2 %>%
+  group_by(n) %>%
+  summarise(t_medio = mean(tempo_esecuzione))
+
+data_s1 <- data_s1 %>% mutate(tipo = "s1")
+data_s2  <- data_s2 %>% mutate(tipo = "s2")
+
+data_all <- bind_rows(data_s1, data_s2)
+
+ggplot(data_all, aes(x = n^2, y = t_medio, color = tipo)) +
+  geom_line(size = 1) +       
+  #geom_point() +                
+  labs(
+    x = "n^2",
+    y = "Tempo medio di esecuzione",
+    color = "Tipo esecuzione",
+    title = "Confronto tempi s_01 vs s_02"
+  ) +
+  theme_minimal(base_size = 14) # tema pulito

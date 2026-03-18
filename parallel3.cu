@@ -23,7 +23,7 @@ inline uint8_t getBit(uint32_t* matrix, int row, int col, int numWords)
 {
     int word = col / WORD_SIZE;
     int bit = col % WORD_SIZE;
-    return (matrix[row*numWords + word] >> bit) & 1;
+    return (matrix[row*numWords + word] >> bit) & 1; //controllo se un determinato bit è 1 
 }
 
 inline void toggleBit(uint32_t* matrix, int row, int col, int numWords)
@@ -60,12 +60,11 @@ __global__ void rowsElimination3(
         int word = pivotCol / WORD_SIZE;
         int bit  = pivotCol % WORD_SIZE;
 
-        if ((matrix[globalRow * numWords + word] >> bit) & 1)
+        if ((matrix[globalRow * numWords + word] >> bit) & 1) //controllo se un determinato bit è 1 
         {
             for (int w = wordStart; w < numWords; w++)
             {
-                matrix[globalRow * numWords + w] ^=
-                    pivotShared[w];  // 🚀 shared invece di global
+                matrix[globalRow * numWords + w] ^= pivotShared[w];  
             }
         }
     }
