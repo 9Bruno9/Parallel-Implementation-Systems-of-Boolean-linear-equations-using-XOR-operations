@@ -8,7 +8,8 @@ main: main.cu seriale.c matrix_generator.c
 	gcc -c seriale.c -o seriale.o
 	nvcc -c  parallel1.cu -o parallel1.o
 	nvcc -c  parallel2.cu -o parallel2.o
-	$(NVCC) -o tester main.cu seriale.o matrix_generator.o parallel1.o parallel2.o
+	nvcc -c  parallel3.cu -o parallel3.o
+	$(NVCC) -o tester main.cu seriale.o matrix_generator.o parallel1.o parallel2.o parallel3.o
 	
 run_seriale: tester
 	./tester versione_seriale	
@@ -18,6 +19,15 @@ run_par1: tester
 
 run_par2: tester
 	./tester versione_p2
+
+run_par3: tester
+	./tester versione_p3
+
+all: tester
+	./tester versione_seriale
+	./tester versione_p1
+	./tester versione_p2
+	./tester versione_p3
 
 run_test: SerialeDemo.c
 	$(CC) -o SerialeDemo SerialeDemo.c seriale.o
@@ -38,6 +48,13 @@ run_test_CUDA2: parallel2demo.cu
 	./parallel2demo ./test/test1.txt
 	./parallel2demo ./test/test2.txt
 	./parallel2demo ./test/test3.txt
+	./parallel2demo ./test/test4.txt
+
+run_test_CUDA3: parallel3demo.cu
+	$(NVCC) -o parallel3demo parallel3demo.cu parallel3.o
+	./parallel3demo ./test/test1.txt
+	./parallel3demo ./test/test2.txt
+	./parallel3demo ./test/test3.txt
 	./parallel2demo ./test/test4.txt
 
 
