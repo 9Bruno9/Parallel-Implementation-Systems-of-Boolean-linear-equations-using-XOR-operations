@@ -33,95 +33,102 @@ inline void toggleBit(uint32_t* matrix, int row, int col, int numWords)
     matrix[row*numWords + word] ^= (1u << bit);
 }
 
-
-// KERNEL CUDA: elimina righe sotto il pivot
-__global__ void rowsElimination3(
-    uint32_t* matrix, int n, int numWords,
-    int pivotRow, int pivotCol)
+__global__ void findPivotKernel(uint32_t* matrix, int n, int numWords,
+                               int col, int startRow, int* pivot)
 {
-    extern __shared__ uint32_t pivotShared[];
+    int row = blockIdx.x * blockDim.x + threadIdx.x;
 
-    int tid = threadIdx.x;
-    int globalRow = blockIdx.x * blockDim.x + tid;
+    if (row < startRow || row >= n) return;
 
-    int wordStart = pivotCol / WORD_SIZE;
+    int word = col / WORD_SIZE;
+    int bit = col % WORD_SIZE;
 
-    // Carico pivot row in shared memory
-    for (int w = tid; w < numWords; w += blockDim.x)
-    {
-        pivotShared[w] = matrix[pivotRow * numWords + w];
-    }
-
-    __syncthreads();
-
-    // Elimino righe
-    if (globalRow > pivotRow && globalRow < n)
-    {
-        int word = pivotCol / WORD_SIZE;
-        int bit  = pivotCol % WORD_SIZE;
-
-        if ((matrix[globalRow * numWords + word] >> bit) & 1) //controllo se un determinato bit è 1 
-        {
-            for (int w = wordStart; w < numWords; w++)
-            {
-                matrix[globalRow * numWords + w] ^= pivotShared[w];  
-            }
-        }
+    if ((matrix[row*numWords + word] >> bit) & 1) {
+        atomicMin(pivot, row); // prende il primo pivot valido
     }
 }
+
+__global__ void swapRowsKernel(uint32_t* matrix, int numWords,int row1, int row2){
+    int w = threadIdx.x + blockIdx.x * blockDim.x;
+
+    if (w < numWords) {
+        uint32_t tmp = matrix[row1*numWords + w];
+        matrix[row1*numWords + w] = matrix[row2*numWords + w];
+        matrix[row2*numWords + w] = tmp;
+    }
+}
+
+__global__ void eliminationKernel(uint32_t* matrix, int n, int numWords,
+                                 int pivotRow, int pivotCol)
+{
+    int row = blockIdx.x;
+    int w = threadIdx.x;
+
+    if (row <= pivotRow || row >= n) return;
+    if (w >= numWords) return;
+
+    int word = pivotCol / WORD_SIZE;
+    int bit = pivotCol % WORD_SIZE;
+
+    if ((matrix[row*numWords + word] >> bit) & 1) {
+        matrix[row*numWords + w] ^= matrix[pivotRow*numWords + w];
+    }
+}
+
+// KERNEL CUDA: elimina righe sotto il pivot
+
 
 bool gaussianEliminationCuda3(uint32_t* h_matrix, int n, int k, uint8_t* solution)
 {
     int vars = k - 1;
     int rank = 0;
-    
     int numWords = (k + WORD_SIZE - 1) / WORD_SIZE;
 
     uint32_t* d_matrix;
+    int* d_pivot;
+
     cudaMalloc(&d_matrix, n * numWords * sizeof(uint32_t));
-    CHECK(cudaMemcpy(d_matrix, h_matrix, n*numWords*sizeof(uint32_t), cudaMemcpyHostToDevice));
+    cudaMalloc(&d_pivot, sizeof(int));
+
+    cudaMemcpy(d_matrix, h_matrix, n * numWords * sizeof(uint32_t), cudaMemcpyHostToDevice);
+
     for (int col = 0; col < vars && rank < n; col++)
     {
-        int pivot = -1;
-        // Cerco pivot 
-        for (int row = rank; row < n; row++)
-        {
-            if (getBit(h_matrix, row, col, numWords)){
-                pivot = row;
-                break;
-            }
-        }
+        int INF = n;
+        cudaMemcpy(d_pivot, &INF, sizeof(int), cudaMemcpyHostToDevice);
 
-        if (pivot == -1) 
-            continue;
-
-        // Scambio righe 
-        if (pivot != rank)
-        {
-            for (int w = 0; w < numWords; w++)
-            {
-                uint32_t tmp = h_matrix[rank*numWords + w];
-                h_matrix[rank*numWords + w] = h_matrix[pivot*numWords + w];
-                h_matrix[pivot*numWords + w] = tmp;
-            }
-
-            CHECK(cudaMemcpy(d_matrix, h_matrix, n * numWords * sizeof(uint32_t), cudaMemcpyHostToDevice));
-        }
-
-        
-
+        // 1. FIND PIVOT
         int threads = 256;
         int blocks = (n + threads - 1) / threads;
 
-        size_t sharedSize = numWords * sizeof(uint32_t);
+        findPivotKernel<<<blocks, threads>>>(d_matrix, n, numWords, col, rank, d_pivot);
+        cudaDeviceSynchronize();
 
-        rowsElimination3<<<blocks, threads, sharedSize>>>(d_matrix, n, numWords, rank, col);
+        int pivot;
+        cudaMemcpy(&pivot, d_pivot, sizeof(int), cudaMemcpyDeviceToHost);
 
-        CHECK(cudaMemcpy(h_matrix, d_matrix, n*numWords*sizeof(uint32_t),cudaMemcpyDeviceToHost));
+        if (pivot == n) continue;
+
+        // 2. SWAP
+        if (pivot != rank) {
+            int t = 256;
+            int b = (numWords + t - 1) / t;
+            swapRowsKernel<<<b, t>>>(d_matrix, numWords, rank, pivot);
+        }
+
+        // 3. ELIMINATION
+        eliminationKernel<<<n, numWords>>>(d_matrix, n, numWords, rank, col);
+        cudaDeviceSynchronize();
+
         rank++;
     }
 
-    
+    // copia finale UNA SOLA VOLTA
+    cudaMemcpy(h_matrix, d_matrix, n*numWords*sizeof(uint32_t), cudaMemcpyDeviceToHost);
+
+    cudaFree(d_matrix);
+    cudaFree(d_pivot);
+
     // controllo se il sistema è risolvibile 
     for (int row = rank; row < n; row++) {
         if (getBit(h_matrix, row, vars, numWords)) {

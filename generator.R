@@ -112,16 +112,16 @@ identical(data_p2$result, data_ser$result)
 identical(data_p1$result, data_p2$result)
 identical(data_p3$result, data_ser$result)
 
-####02#######################################
+####03#######################################
 
 
-data_ser <- read.csv("result_data/risultati_seriale_02.csv")
+data_ser <- read.csv("result_data/risultati_seriale_03.csv")
 
 data_ser <-data_ser %>%
   group_by(n) %>%
   summarise(t_medio = mean(tempo_esecuzione))
 
-data_p1 <-read.csv("result_data/risultati_p1_02.csv")
+data_p1 <-read.csv("result_data/risultati_p1_03.csv")
 
 data_p1 <-data_p1 %>%
   group_by(n) %>%
@@ -130,12 +130,12 @@ data_p1 <-data_p1 %>%
 
 plot(data_ser$n^2, data_ser$media, type="l")
 
-data_p2 <-read.csv("result_data/risultati_p2_02.csv")
+data_p2 <-read.csv("result_data/risultati_p2_03.csv")
 data_p2 <-data_p2 %>%
   group_by(n) %>%
   summarise(t_medio = mean(tempo_esecuzione))
 
-data_p3 <-read.csv("result_data/risultati_p3_02.csv")
+data_p3 <-read.csv("result_data/risultati_p3_03.csv")
 data_p3 <-data_p3 %>%
   group_by(n) %>%
   summarise(t_medio = mean(tempo_esecuzione))
@@ -146,7 +146,7 @@ data_p2  <- data_p2 %>% mutate(tipo = "p2")
 data_p3  <- data_p3 %>% mutate(tipo = "p3")
 # Unisci i dataset
 data_all <- bind_rows(data_ser, data_p1, data_p2, data_p3)
-data_all <- bind_rows(data_p2, data_p3)
+#data_all <- bind_rows(data_p2, data_p3)
 
 
 
@@ -162,11 +162,11 @@ ggplot(data_all, aes(x = n^2, y = t_medio, color = tipo)) +
   theme_minimal(base_size = 14) # tema pulito
 
 
-data_ser <- read.csv("result_data/risultati_seriale_02.csv")
+data_ser <- read.csv("result_data/risultati_seriale_03.csv")
 
-data_p1 <-read.csv("result_data/risultati_p1_02.csv")
-data_p2 <-read.csv("result_data/risultati_p2_02.csv")
-data_p3 <-read.csv("result_data/risultati_p3_02.csv")
+data_p1 <-read.csv("result_data/risultati_p1_03.csv")
+data_p2 <-read.csv("result_data/risultati_p2_03.csv")
+data_p3 <-read.csv("result_data/risultati_p3_03.csv")
 
 identical(data_p1$result, data_ser$result)
 identical(data_p2$result, data_ser$result)

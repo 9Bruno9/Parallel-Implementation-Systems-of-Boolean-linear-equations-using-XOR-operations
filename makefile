@@ -6,23 +6,26 @@ TARGETS = tester SerialeDemo
 main: main.cu seriale.c matrix_generator.c p_demo.cu
 	gcc -c matrix_generator.c -o matrix_generator.o
 	gcc -c seriale.c -o seriale.o
-	nvcc -c  parallel1.cu -o parallel1.o
-	nvcc -c  parallel2.cu -o parallel2.o
-	nvcc -c  parallel3.cu -o parallel3.o
-	$(NVCC) -o tester main.cu seriale.o matrix_generator.o parallel1.o parallel2.o parallel3.o
-	$(NVCC) -o p_demo p_demo.cu parallel1.o parallel2.o parallel3.o
+	nvcc -arch=sm_86 -rdc=true -c   parallel1.cu -o parallel1.o
+	nvcc -arch=sm_86 -rdc=true -c   parallel2.cu -o parallel2.o
+	nvcc -arch=sm_86 -rdc=true -c  parallel3.cu -o parallel3.o
+	nvcc -arch=sm_86 -rdc=true -c  parallel4.cu -o parallel4.o
+	$(NVCC) -arch=sm_86 -rdc=true -o tester main.cu seriale.o matrix_generator.o parallel1.o parallel2.o parallel3.o parallel4.o
+	$(NVCC) -arch=sm_86 -rdc=true -o p_demo p_demo.cu parallel1.o parallel2.o parallel3.o parallel4.o
 	
 run_seriale: tester
 	./tester versione_seriale	
 
-run_par1: tester
+run_p1: tester
 	./tester versione_p1
 
-run_par2: tester
+run_p2: tester
 	./tester versione_p2
 
-run_par3: tester
+run_p3: tester
 	./tester versione_p3
+run_p4: tester
+	./tester versione_p4
 
 all: tester
 	./tester versione_seriale
@@ -54,6 +57,12 @@ demo_p3: p_demo.cu
 	./p_demo ./test/test2.txt p3
 	./p_demo ./test/test3.txt p3
 	./p_demo ./test/test4.txt p3
+	
+demo_p4: p_demo.cu
+	./p_demo ./test/test1.txt p4
+	./p_demo ./test/test2.txt p4
+	./p_demo ./test/test3.txt p4
+	./p_demo ./test/test4.txt p4
 
 
 clean:
