@@ -3,13 +3,14 @@ NVCC = nvcc
 TARGETS = tester SerialeDemo
 
 
-main: main.cu seriale.c matrix_generator.c
+main: main.cu seriale.c matrix_generator.c p_demo.cu
 	gcc -c matrix_generator.c -o matrix_generator.o
 	gcc -c seriale.c -o seriale.o
 	nvcc -c  parallel1.cu -o parallel1.o
 	nvcc -c  parallel2.cu -o parallel2.o
 	nvcc -c  parallel3.cu -o parallel3.o
 	$(NVCC) -o tester main.cu seriale.o matrix_generator.o parallel1.o parallel2.o parallel3.o
+	$(NVCC) -o p_demo p_demo.cu parallel1.o parallel2.o parallel3.o
 	
 run_seriale: tester
 	./tester versione_seriale	
@@ -36,26 +37,23 @@ run_test: SerialeDemo.c
 	./SerialeDemo ./test/test3.txt
 	./SerialeDemo ./test/test4.txt
 
-run_test_CUDA1: parallel1demo.cu
-	$(NVCC) -o parallel1demo parallel1demo.cu parallel1.o
-	./parallel1demo ./test/test1.txt
-	./parallel1demo ./test/test2.txt
-	./parallel1demo ./test/test3.txt
-	./parallel1demo ./test/test4.txt
+demo_p1: p_demo.cu
+	./p_demo ./test/test1.txt p1
+	./p_demo ./test/test2.txt p1
+	./p_demo ./test/test3.txt p1
+	./p_demo ./test/test4.txt p1
 
-run_test_CUDA2: parallel2demo.cu
-	$(NVCC) -o parallel2demo parallel2demo.cu parallel2.o
-	./parallel2demo ./test/test1.txt
-	./parallel2demo ./test/test2.txt
-	./parallel2demo ./test/test3.txt
-	./parallel2demo ./test/test4.txt
+demo_p2: p_demo.cu
+	./p_demo ./test/test1.txt p2
+	./p_demo ./test/test2.txt p2
+	./p_demo ./test/test3.txt p2
+	./p_demo ./test/test4.txt p2
 
-run_test_CUDA3: parallel3demo.cu
-	$(NVCC) -o parallel3demo parallel3demo.cu parallel3.o
-	./parallel3demo ./test/test1.txt
-	./parallel3demo ./test/test2.txt
-	./parallel3demo ./test/test3.txt
-	./parallel2demo ./test/test4.txt
+demo_p3: p_demo.cu
+	./p_demo ./test/test1.txt p3
+	./p_demo ./test/test2.txt p3
+	./p_demo ./test/test3.txt p3
+	./p_demo ./test/test4.txt p3
 
 
 clean:

@@ -51,8 +51,7 @@ bool gaussianEliminationCuda1(uint8_t* h_matrix, int n, int k, uint8_t* solution
             }
         }
 
-        if (pivot == -1) 
-            continue;
+        if (pivot == -1) {continue;}
 
         // Scambio righe 
         if (pivot != rank)
@@ -67,7 +66,7 @@ bool gaussianEliminationCuda1(uint8_t* h_matrix, int n, int k, uint8_t* solution
             CHECK(cudaMemcpy(d_matrix, h_matrix, n*k*sizeof(uint8_t), cudaMemcpyHostToDevice));
         }
 
-        int threads = 1024;
+        int threads = 256;
         int blocks = (n + threads - 1) / threads;
 
         rowsElimination<<<blocks, threads>>>(d_matrix, n, k, rank, col);
@@ -88,7 +87,7 @@ bool gaussianEliminationCuda1(uint8_t* h_matrix, int n, int k, uint8_t* solution
 
     for (int i = 0; i < vars; i++) {solution[i] = 0;}
 
-    for (int i = rank - 1; i >= 0; i--)
+    for (int i = rank - 1; i >= 0; i--)//scorro partendo dall'ultima riga non nulla
     {
         int pivotCol = -1;
 

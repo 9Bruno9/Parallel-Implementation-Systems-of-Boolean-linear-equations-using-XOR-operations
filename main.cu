@@ -13,7 +13,7 @@
 #include "parallel2.h"
 #include "parallel3.h"
 
-#define N_TRY 45
+#define N_TRY 10
 
 int main(int argc, char *argv[]) {
     
@@ -69,13 +69,9 @@ int main(int argc, char *argv[]) {
     
     int n_values[N_TRY];
     for(int i=0; i<N_TRY; i++){
-        n_values[i]= 100*(i+1);
+        n_values[i]= 512*(i+1);
     }
-
-
-    //int k_values[] = {100, 200, 300, 400, 500};
-    
-     
+         
     clock_t start;
     clock_t end;
     bool result; 

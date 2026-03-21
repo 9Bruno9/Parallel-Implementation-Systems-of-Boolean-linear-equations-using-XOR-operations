@@ -25,7 +25,7 @@ bool gaussianElimination(int n, int k, bool **matrix, bool *solution) {
 
         // Scambia la riga del pivot con la riga corrente
         if (pivot != rank) {
-            for (int j = 0; j < k; j++) {  //!!!! <=
+            for (int j = 0; j < k; j++) {  
                 bool temp = matrix[rank][j];
                 matrix[rank][j] = matrix[pivot][j];
                 matrix[pivot][j] = temp;
@@ -36,7 +36,7 @@ bool gaussianElimination(int n, int k, bool **matrix, bool *solution) {
         // Elimina la colonna sotto il pivot
         for (int row = rank + 1; row < n; row++) {
             if (matrix[row][col]) {
-                for (int j = col; j < k; j++) { //!!!!<=
+                for (int j = col; j < k; j++) { 
                     matrix[row][j] ^= matrix[rank][j]; //XOR tra pivot e colonna da eliminare, dato che le variabili sono booleane fare xor elemento per elemento corrisponde ad un'eliminazione
                 }
 
@@ -47,15 +47,12 @@ bool gaussianElimination(int n, int k, bool **matrix, bool *solution) {
         
     }
     
-
     // Controlla se il sistema è risolvibile
     for (int row = rank; row < n; row++) {
-
         if (matrix[row][k-1]) { return false; }
     }
 
     // Back substitution
-
     for (int i = rank - 1; i >= 0; i--) {
         int piv;
         for(int m = 0; m < k; m++)
