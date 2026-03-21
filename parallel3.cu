@@ -110,7 +110,7 @@ bool gaussianEliminationCuda3(uint32_t* h_matrix, int n, int k, uint8_t* solutio
 
         
 
-        int threads = min((n + 32 -1)/32 ,1024);
+        int threads = 256;
         int blocks = (n + threads - 1) / threads;
 
         size_t sharedSize = numWords * sizeof(uint32_t);
