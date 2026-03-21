@@ -73,7 +73,7 @@ data_p2 <-data_p2 %>%
   group_by(n) %>%
   summarise(t_medio = mean(tempo_esecuzione))
 
-data_p3 <-read.csv("result_data/risultati_p3_01.csv")
+data_p3 <-read.csv("result_data/risultati_p3_01_10.csv")
 data_p3 <-data_p3 %>%
   group_by(n) %>%
   summarise(t_medio = mean(tempo_esecuzione))
@@ -89,9 +89,9 @@ data_p2  <- data_p2 %>% mutate(tipo = "p2")
 data_p3  <- data_p3 %>% mutate(tipo = "p3")
 data_p4  <- data_p4 %>% mutate(tipo = "p4")
 # Unisci i dataset
-data_all <- bind_rows(data_ser, data_p1, data_p2, data_p3, data_p4)
+data_all <- bind_rows(data_ser, data_p1, data_p2, data_p3)
 #data_all <- bind_rows(data_p2, data_p3)
-data_all <- bind_rows(data_ser, data_p1, data_p2)
+
 
 
 ggplot(data_all, aes(x = n^2, y = t_medio, color = tipo)) +
@@ -106,10 +106,10 @@ ggplot(data_all, aes(x = n^2, y = t_medio, color = tipo)) +
   theme_minimal(base_size = 14) # tema pulito
 
 
-data_ser <- read.csv("result_data/risultati_seriale_01.csv")
+data_ser <- read.csv("result_data/risultati_seriale_01_10.csv")
 
-data_p1 <-read.csv("result_data/risultati_p1_01.csv")
-data_p2 <-read.csv("result_data/risultati_p2_01.csv")
+data_p1 <-read.csv("result_data/risultati_p1_01_10.csv")
+data_p2 <-read.csv("result_data/risultati_p2_01_10.csv")
 data_p3 <-read.csv("result_data/risultati_p3_01.csv")
 
 identical(data_p1$result, data_ser$result)
