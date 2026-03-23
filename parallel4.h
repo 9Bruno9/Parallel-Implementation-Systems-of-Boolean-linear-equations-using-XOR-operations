@@ -10,6 +10,7 @@ __global__ void findPivotKernel4(uint32_t* matrix, int n, int numWords, int col,
 __global__ void swapRowsKernel4(uint32_t* matrix, int numWords, int r1, int r2);
 __global__ void eliminateKernel(uint32_t* matrix, int n, int numWords, int pivotRow, int pivotCol);
 __global__ void gaussianEliminationKernel4(uint32_t* matrix, int n, int k);
+__global__ void gaussianMasterKernel4(uint32_t* matrix, int n, int k, int numWords, int* d_pivot, int* d_rank);
 bool gaussianEliminationCuda4(uint32_t* h_matrix, int n, int k, uint8_t* solution);
 
 #endif

@@ -33,7 +33,7 @@ all: tester
 	./tester versione_p2
 	./tester versione_p3
 
-run_test: SerialeDemo.c
+demo_ser: SerialeDemo.c
 	$(CC) -o SerialeDemo SerialeDemo.c seriale.o
 	./SerialeDemo ./test/test1.txt
 	./SerialeDemo ./test/test2.txt
