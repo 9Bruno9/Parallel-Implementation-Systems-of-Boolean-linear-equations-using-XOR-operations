@@ -12,5 +12,6 @@ __global__ void eliminateKernel(uint32_t* matrix, int n, int numWords, int pivot
 __global__ void gaussianEliminationKernel4(uint32_t* matrix, int n, int k);
 __global__ void gaussianMasterKernel4(uint32_t* matrix, int n, int k, int numWords, int* d_pivot, int* d_rank);
 bool gaussianEliminationCuda4(uint32_t* h_matrix, int n, int k, uint8_t* solution);
+__global__ void rowXorKernel(uint32_t* matrix, int n, int numWords, int pivotRow, int col, int startRow);
 
 #endif

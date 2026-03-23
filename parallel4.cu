@@ -32,54 +32,67 @@ __global__ void findPivotKernel4(uint32_t* matrix, int n, int numWords, int col,
     }
 }
 
-__global__ void eliminationAndNextStepKernel4(uint32_t* matrix, int n, int k, int numWords, int col, int* d_pivot, int* d_rank);
+__global__ void rowXorKernel(uint32_t* matrix, int n, int numWords, int pivotRow, int col, int startRow) {
+    int r = blockIdx.x * blockDim.x + threadIdx.x + startRow;
+    if (r >= n) return;
+
+    // Ogni thread controlla la propria riga e decide se fare lo XOR
+    if (getBitDevice(matrix, r, col, numWords)) {
+        for (int w = 0; w < numWords; w++) {
+            matrix[r * numWords + w] ^= matrix[pivotRow * numWords + w];
+        }
+    }
+}
 
 __global__ void swapAndEliminateKernel4(uint32_t* matrix, int n, int k, int numWords, int col, int* d_pivot, int* d_rank) {
+    // Solo il primo thread del blocco gestisce la logica di controllo
     int pivotIdx = *d_pivot;
     int currentRank = *d_rank;
     int vars = k - 1;
 
     if (pivotIdx != n) {
-        // Esegui Swap (se necessario) - Qui usiamo un solo thread per lanciare i figli
+        // --- SWAP PARALLELO ---
+        // Usiamo tutti i thread del blocco per scambiare le parole della riga simultaneamente
         if (pivotIdx != currentRank) {
-            int b_swap = (numWords + 255) / 256;
-            cudaStream_t s;
-            cudaStreamCreateWithFlags(&s, cudaStreamNonBlocking);
+            for (int w = threadIdx.x; w < numWords; w += blockDim.x) {
+                uint32_t tmp = matrix[currentRank * numWords + w];
+                matrix[currentRank * numWords + w] = matrix[pivotIdx * numWords + w];
+                matrix[pivotIdx * numWords + w] = tmp;
+            }
+        }
+        __syncthreads(); // Aspettiamo che lo swap sia finito
+
+        // --- ELIMINAZIONE PARALLELA ---
+        // Solo il thread 0 lancia il kernel figlio per processare le righe rimanenti
+        if (threadIdx.x == 0) {
+            int startRowForElimination = currentRank + 1;
+            int rowsToProcess = n - startRowForElimination;
             
-            // Swap Rows
-            uint32_t* r1 = &matrix[currentRank * numWords];
-            uint32_t* r2 = &matrix[pivotIdx * numWords];
-            for(int w = 0; w < numWords; w++) {
-                uint32_t tmp = r1[w];
-                r1[w] = r2[w];
-                r2[w] = tmp;
+            if (rowsToProcess > 0) {
+                int threads = 256;
+                int blocks = (rowsToProcess + threads - 1) / threads;
+                // Lancio asincrono del figlio
+                rowXorKernel<<<blocks, threads>>>(matrix, n, numWords, currentRank, col, startRowForElimination);
             }
+            (*d_rank)++;
         }
-
-        // Eliminazione (diretta o tramite lancio figlio)
-        int rowsToProcess = n - currentRank - 1;
-        if (rowsToProcess > 0) {
-            for (int r = currentRank + 1; r < n; r++) {
-                if (getBitDevice(matrix, r, col, numWords)) {
-                    for (int w = 0; w < numWords; w++) {
-                        matrix[r * numWords + w] ^= matrix[currentRank * numWords + w];
-                    }
-                }
-            }
-        }
-        (*d_rank)++;
     }
+    __syncthreads(); // Sincronizzazione prima della ricorsione
 
-    // LANCIO RICORSIVO PER LA PROSSIMA COLONNA
-    // In CUDA, i kernel lanciati dallo stesso thread sono messi in coda.
-    // Non serve sincronizzare perché il lancio successivo avviene dopo che questo ha finito.
-    int nextCol = col + 1;
-    if (nextCol < vars && *d_rank < n) {
-        *d_pivot = n; // Reset per la prossima iterazione
-        int threads = 256;
-        int blocks = (n - (*d_rank) + threads - 1) / threads;
-        findPivotKernel4<<<blocks, threads>>>(matrix, n, numWords, nextCol, *d_rank, d_pivot);
-        swapAndEliminateKernel4<<<1, 1>>>(matrix, n, k, numWords, nextCol, d_pivot, d_rank);
+    // --- PROSSIMA ITERAZIONE (RICORSIONE) ---
+    if (threadIdx.x == 0) {
+        int nextCol = col + 1;
+        if (nextCol < vars && *d_rank < n) {
+            *d_pivot = n; 
+            int threads = 256;
+            int blocks = (n - (*d_rank) + threads - 1) / threads;
+            
+            // Catena di lancio: Pivot -> Swap&Eliminate
+            findPivotKernel4<<<blocks, threads>>>(matrix, n, numWords, nextCol, *d_rank, d_pivot);
+            
+            // NOTA: Il lancio di swapAndEliminate deve usare più thread ora!
+            swapAndEliminateKernel4<<<1, 256>>>(matrix, n, k, numWords, nextCol, d_pivot, d_rank);
+        }
     }
 }
 
