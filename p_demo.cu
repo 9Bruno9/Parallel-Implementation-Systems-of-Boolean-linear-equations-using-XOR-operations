@@ -9,6 +9,7 @@
 #include "parallel2.h"
 #include "parallel3.h"
 #include "parallel4.h"
+#include "parallel5.h"
 
 int main(int argc, char* argv[])
 {
@@ -199,6 +200,50 @@ int main(int argc, char* argv[])
         fclose(file);
 
         bool ok = gaussianEliminationCuda4(matrix.data(), n, k, solution.data());
+
+        if (!ok)
+        {
+            printf("Sistema irrisolvibile.\n");
+        }
+        else
+        {
+            printf("Sistema risolvibile.\n");
+            printf("Soluzione:\n");
+            for (int i = 0; i < k-1; i++)
+                printf("x%d = %d\n", i+1, solution[i]);
+        }
+
+
+
+        return 0;
+    }
+    if(strcmp(input_string, "p5") == 0){
+        int numWords = (k + 32 - 1) / 32;
+
+        std::vector<uint32_t> matrix(n * numWords, 0);
+
+        std::vector<uint8_t> solution(k-1);
+
+        for (int i = 0; i < n; i++)
+        {
+            for (int j = 0; j < k; j++)
+            {
+                int val;
+                fscanf(file, "%d", &val);
+
+                if (val)
+                {
+                    int word = j / 32;
+                    int bit  = j % 32;
+
+                    matrix[i*numWords + word] |= (1u << bit); //se 1 crea una word di 32 bit con l'1 nella posizione e poi fai un OR (addizione) alla word attuale per aggiungere quel bit in quella posizione
+                }
+            }
+        }
+
+        fclose(file);
+
+        bool ok = gaussianEliminationCuda5(matrix.data(), n, k, solution.data());
 
         if (!ok)
         {

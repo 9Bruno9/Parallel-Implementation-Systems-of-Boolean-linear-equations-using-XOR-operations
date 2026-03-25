@@ -13,8 +13,9 @@
 #include "parallel2.h"
 #include "parallel3.h"
 #include "parallel4.h"
+#include "parallel5.h"
 
-#define N_TRY 10
+#define N_TRY 15
 
 int main(int argc, char *argv[]) {
     
@@ -29,14 +30,14 @@ int main(int argc, char *argv[]) {
     // Apri il file CSV per scrivere i risultati
     FILE *csv_file = NULL;
     if(strcmp(input_string, "versione_seriale") == 0){
-         csv_file = fopen("result_data/risultati_seriale_05_10.csv", "w");
+         csv_file = fopen("result_data/risultati_seriale_05_15_3050.csv", "w");
         if (!csv_file) {
             perror("Errore nell'apertura del file CSV");
             return 1;
         }
     }
     else if(strcmp(input_string, "versione_p1") == 0){
-        csv_file = fopen("result_data/risultati_p1_05_10.csv", "w");
+        csv_file = fopen("result_data/risultati_p1_05_15_3050.csv", "w");
         if (!csv_file) {
             perror("Errore nell'apertura del file CSV");
             return 1;
@@ -44,7 +45,7 @@ int main(int argc, char *argv[]) {
 
     }
     else if(strcmp(input_string, "versione_p2") == 0){
-        csv_file = fopen("result_data/risultati_p2_05_10.csv", "w");
+        csv_file = fopen("result_data/risultati_p2_05_15_3050.csv", "w");
         if (!csv_file) {
             perror("Errore nell'apertura del file CSV");
             return 1;
@@ -52,14 +53,21 @@ int main(int argc, char *argv[]) {
 
     }
     else if(strcmp(input_string, "versione_p3") == 0){
-        csv_file = fopen("result_data/risultati_p3_05_10.csv", "w");
+        csv_file = fopen("result_data/risultati_p3_05_15_3050.csv", "w");
         if (!csv_file) {
             perror("Errore nell'apertura del file CSV");
             return 1;
         }
     }
     else if(strcmp(input_string, "versione_p4") == 0){
-        csv_file = fopen("result_data/risultati_p4_01_10.csv", "w");
+        csv_file = fopen("result_data/risultati_p4_05_15_3050.csv", "w");
+        if (!csv_file) {
+            perror("Errore nell'apertura del file CSV");
+            return 1;
+        }
+    }
+    else if(strcmp(input_string, "versione_p5") == 0){
+        csv_file = fopen("result_data/risultati_p5_05_15_3050.csv", "w");
         if (!csv_file) {
             perror("Errore nell'apertura del file CSV");
             return 1;
@@ -67,7 +75,7 @@ int main(int argc, char *argv[]) {
     }
     else return 1;
 
-    double theta = 0.1;
+    double theta = 0.7;
 
     // Scrivi l'intestazione del file CSV
     fprintf(csv_file, "n,k,theta,tempo_esecuzione, result\n");
@@ -239,6 +247,40 @@ int main(int argc, char *argv[]) {
                             
                             
                             printf("n=%d, k=%d, theta=%f, Tempo: %f secondi, Risultato: %d\n", n, k, theta, tempo_esecuzione, result);
+                }
+                else if(strcmp(input_string, "versione_p5") == 0){
+                            
+                            int numWords = (k + 31) / 32;
+
+                            uint32_t *h_matrix = (uint32_t *)malloc(n * numWords * sizeof(uint32_t));
+                            memset(h_matrix, 0, n * numWords * sizeof(uint32_t));
+
+
+                            for (int i = 0; i < n; i++) {
+                                for (int j = 0; j < k; j++) {
+                                    if (matrix[i][j]) {
+                                        int word = j / 32;
+                                        int bit = j % 32;
+                                        h_matrix[i * numWords + word] |= (1u << bit);
+                                    }
+                                }
+                            }
+                            
+                            uint8_t *solution = (uint8_t *)malloc((k-1) * sizeof(uint8_t));
+
+                            start = clock();
+                            result = gaussianEliminationCuda5(h_matrix, n, k, solution);
+                            end = clock();
+                            tempo_esecuzione = ((double)(end - start)) / CLOCKS_PER_SEC;
+                            
+                            // Scrivi i risultati sul file CSV
+                            fprintf(csv_file, "%d,%d,%f,%f,%d\n", n, k, theta, tempo_esecuzione, result);
+                            
+                            free(solution);
+                            free(h_matrix);
+                            
+                            
+                            printf("p5 n=%d, k=%d, theta=%f, Tempo: %f secondi, Risultato: %d\n", n, k, theta, tempo_esecuzione, result);
                 }
                         for (int x = 0; x < n; x++)
                                 free(matrix[x]);

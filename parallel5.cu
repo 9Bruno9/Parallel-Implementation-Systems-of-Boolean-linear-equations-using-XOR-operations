@@ -5,7 +5,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include <vector>
-#include "parallel3.h"
+#include "parallel5.h"
 
 #define WORD_SIZE 32
 
@@ -19,21 +19,21 @@
 }
 
 // Accesso ai bit
-inline uint8_t getBit(uint32_t* matrix, int row, int col, int numWords)
+inline uint8_t getBit5(uint32_t* matrix, int row, int col, int numWords)
 {
     int word = col / WORD_SIZE;
     int bit = col % WORD_SIZE;
     return (matrix[row*numWords + word] >> bit) & 1; //controllo se un determinato bit è 1 
 }
 
-inline void toggleBit(uint32_t* matrix, int row, int col, int numWords)
+inline void toggleBit5(uint32_t* matrix, int row, int col, int numWords)
 {
     int word = col / WORD_SIZE;
     int bit = col % WORD_SIZE;
     matrix[row*numWords + word] ^= (1u << bit);
 }
 
-__global__ void findPivotKernel(uint32_t* matrix, int n, int numWords,
+__global__ void findPivotKernel5(uint32_t* matrix, int n, int numWords,
                                int col, int startRow, int* pivot)
 {
     int row = blockIdx.x * blockDim.x + threadIdx.x;
@@ -48,7 +48,7 @@ __global__ void findPivotKernel(uint32_t* matrix, int n, int numWords,
     }
 }
 
-__global__ void swapRowsKernel(uint32_t* matrix, int numWords,int row1, int row2){
+__global__ void swapRowsKernel5(uint32_t* matrix, int numWords,int row1, int row2){
     int w = threadIdx.x + blockIdx.x * blockDim.x;
 
     if (w < numWords) {
@@ -58,27 +58,35 @@ __global__ void swapRowsKernel(uint32_t* matrix, int numWords,int row1, int row2
     }
 }
 
-__global__ void eliminationKernel(uint32_t* matrix, int n, int numWords,
-                                 int pivotRow, int pivotCol)
+__global__ void eliminationKernel5(uint32_t* matrix, int n, int numWords,
+                                           int pivotRow, int pivotCol)
 {
-    int row = blockIdx.x; // ogni block una row
-    int w = threadIdx.x; // ogni thread una word
+    int row = blockIdx.x;
 
     if (row <= pivotRow || row >= n) return;
-    if (w >= numWords) return;
 
     int word = pivotCol / WORD_SIZE;
-    int bit = pivotCol % WORD_SIZE;
+    int bit  = pivotCol % WORD_SIZE;
 
-    if ((matrix[row*numWords + word] >> bit) & 1) {
-        matrix[row*numWords + w] ^= matrix[pivotRow*numWords + w];
+    // calcolo ID lineare del thread nel blocco 2D
+    int local_id = threadIdx.y * blockDim.x + threadIdx.x;
+    int stride   = blockDim.x * blockDim.y;
+
+    // controllo pivot (tutti i thread fanno lo stesso check)
+    if ((matrix[row*numWords + word] >> bit) & 1)
+    {
+        // ogni thread processa più word
+        for (int w = local_id; w < numWords; w += stride)
+        {
+            matrix[row*numWords + w] ^= matrix[pivotRow*numWords + w];
+        }
     }
 }
 
 // KERNEL CUDA: elimina righe sotto il pivot
 
 
-bool gaussianEliminationCuda3(uint32_t* h_matrix, int n, int k, uint8_t* solution)
+bool gaussianEliminationCuda5(uint32_t* h_matrix, int n, int k, uint8_t* solution)
 {
     int vars = k - 1;
     int rank = 0;
@@ -98,10 +106,10 @@ bool gaussianEliminationCuda3(uint32_t* h_matrix, int n, int k, uint8_t* solutio
         cudaMemcpy(d_pivot, &INF, sizeof(int), cudaMemcpyHostToDevice);
 
         // 1. FIND PIVOT
-        int threads = 256;
+        int threads = 32;
         int blocks = (n + threads - 1) / threads;
 
-        findPivotKernel<<<blocks, threads>>>(d_matrix, n, numWords, col, rank, d_pivot);
+        findPivotKernel5<<<blocks, threads>>>(d_matrix, n, numWords, col, rank, d_pivot);
         cudaDeviceSynchronize();
 
         int pivot;
@@ -113,12 +121,18 @@ bool gaussianEliminationCuda3(uint32_t* h_matrix, int n, int k, uint8_t* solutio
         if (pivot != rank) {
             int t = 256;
             int b = (numWords + t - 1) / t;
-            swapRowsKernel<<<b, t>>>(d_matrix, numWords, rank, pivot);
+            swapRowsKernel5<<<b, t>>>(d_matrix, numWords, rank, pivot);
             cudaDeviceSynchronize();
         }
 
         // 3. ELIMINATION
-        eliminationKernel<<<n, numWords>>>(d_matrix, n, numWords, rank, col);
+        dim3 blockDim(16, 16); // 256 thread per riga
+        int gridDim = n;
+
+        eliminationKernel5<<<gridDim, blockDim>>>(
+            d_matrix, n, numWords, rank, col
+        );
+       
         cudaDeviceSynchronize();
 
         rank++;
@@ -132,8 +146,8 @@ bool gaussianEliminationCuda3(uint32_t* h_matrix, int n, int k, uint8_t* solutio
 
     // controllo se il sistema è risolvibile 
     for (int row = rank; row < n; row++) {
-        if (getBit(h_matrix, row, vars, numWords)) {
-            cudaFree(d_matrix); 
+        if (getBit5(h_matrix, row, vars, numWords)) {
+             
             return false; }
     }
    
@@ -149,7 +163,7 @@ bool gaussianEliminationCuda3(uint32_t* h_matrix, int n, int k, uint8_t* solutio
 
         for (int j = 0; j < vars; j++)
         {
-            if (getBit(h_matrix, i, j, numWords))
+            if (getBit5(h_matrix, i, j, numWords))
             {
                 pivotCol = j;
                 break;
@@ -159,11 +173,11 @@ bool gaussianEliminationCuda3(uint32_t* h_matrix, int n, int k, uint8_t* solutio
         if (pivotCol == -1)
             continue;
 
-        solution[pivotCol] = getBit(h_matrix, i, vars, numWords);
+        solution[pivotCol] = getBit5(h_matrix, i, vars, numWords);
 
         for (int j = pivotCol + 1; j < vars; j++)
         {
-            if (getBit(h_matrix, i, j, numWords))
+            if (getBit5(h_matrix, i, j, numWords))
                 solution[pivotCol] ^= solution[j];
         }
     }
