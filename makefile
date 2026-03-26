@@ -10,9 +10,9 @@ main: main.cu seriale.c matrix_generator.c p_demo.cu
 	nvcc -arch=sm_86 -rdc=true -c   parallel2.cu -o parallel2.o
 	nvcc -arch=sm_86 -rdc=true -c  parallel3.cu -o parallel3.o
 	nvcc -arch=sm_86 -rdc=true -c  parallel4.cu -o parallel4.o
-	nvcc -arch=sm_86 -rdc=true -c  parallel5.cu -o parallel5.o
-	$(NVCC) -arch=sm_86 -rdc=true -o tester main.cu seriale.o matrix_generator.o parallel1.o parallel2.o parallel3.o parallel4.o parallel5.o
-	$(NVCC) -arch=sm_86 -rdc=true -o p_demo p_demo.cu parallel1.o parallel2.o parallel3.o parallel4.o parallel5.o
+	#nvcc -arch=sm_86 -rdc=true -c  parallel5.cu -o parallel5.o
+	$(NVCC) -arch=sm_86 -rdc=true -o tester main.cu seriale.o matrix_generator.o parallel1.o parallel2.o parallel3.o parallel4.o #parallel5.o
+	$(NVCC) -arch=sm_86 -rdc=true -o p_demo p_demo.cu parallel1.o parallel2.o parallel3.o parallel4.o #parallel5.o
 	
 run_seriale: tester
 	./tester versione_seriale	

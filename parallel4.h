@@ -3,15 +3,7 @@
 #include <stdint.h>  
 #include <stdbool.h> 
 
-__device__ inline uint8_t getBitDevice(uint32_t* matrix, int row, int col, int numWords);
 
-__global__ void gaussianEliminationCuda4(
-    uint32_t* matrix,
-    int n,
-    int numWords,
-    int col,
-    int rank,
-    int* pivot,
-    bool* foundPivot
-)
+
+bool gaussianEliminationCuda4(uint32_t* h_matrix, int n, int k, uint8_t* solution);
 #endif

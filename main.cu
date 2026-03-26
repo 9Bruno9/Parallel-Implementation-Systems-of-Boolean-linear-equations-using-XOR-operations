@@ -12,7 +12,7 @@
 #include "parallel1.h"
 #include "parallel2.h"
 #include "parallel3.h"
-#include "parallel4.h"
+//#include "parallel4.h"
 #include "parallel5.h"
 
 #define N_TRY 15
@@ -248,7 +248,7 @@ int main(int argc, char *argv[]) {
                             
                             printf("n=%d, k=%d, theta=%f, Tempo: %f secondi, Risultato: %d\n", n, k, theta, tempo_esecuzione, result);
                 }
-                else if(strcmp(input_string, "versione_p5") == 0){
+                /*else if(strcmp(input_string, "versione_p5") == 0){
                             
                             int numWords = (k + 31) / 32;
 
@@ -281,7 +281,7 @@ int main(int argc, char *argv[]) {
                             
                             
                             printf("p5 n=%d, k=%d, theta=%f, Tempo: %f secondi, Risultato: %d\n", n, k, theta, tempo_esecuzione, result);
-                }
+                }*/
                         for (int x = 0; x < n; x++)
                                 free(matrix[x]);
                         free(matrix);

@@ -2,3 +2,6 @@
 *.o
 
 # dataset
+cuda-keyring_1.1-1_all.deb
+tester
+p_demo
