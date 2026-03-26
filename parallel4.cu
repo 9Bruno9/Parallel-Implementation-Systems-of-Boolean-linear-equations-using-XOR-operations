@@ -46,20 +46,7 @@ __global__ void findPivotKernel4(uint32_t* matrix, int n, int numWords,
     if ((matrix[row*numWords + word] >> bit) & 1) {
         atomicMin(pivot, row); // prende il primo pivot valido
     }
-}
-
-__global__ void swapRowsKernel4(uint32_t* matrix, int numWords,int row1, int row2){
-    int w = threadIdx.x + blockIdx.x * blockDim.x;
-
-    if (w < numWords) {
-        uint32_t tmp = matrix[row1*numWords + w];
-        matrix[row1*numWords + w] = matrix[row2*numWords + w];
-        matrix[row2*numWords + w] = tmp;
-    }
-
-       if (idx == 0) {
-        eliminationKernel4<<<2, 5, 0, cudaStreamTailLaunch>>>(data);
-    }
+    
 }
 
 __global__ void eliminationKernel4(uint32_t* matrix, int n, int numWords,
@@ -77,7 +64,30 @@ __global__ void eliminationKernel4(uint32_t* matrix, int n, int numWords,
     if ((matrix[row*numWords + word] >> bit) & 1) {
         matrix[row*numWords + w] ^= matrix[pivotRow*numWords + w];
     }
+    
 }
+
+__global__ void swapRowsKernel4(uint32_t* matrix, int numWords, int rank, int pivot , int col, int n){
+    int w = threadIdx.x + blockIdx.x * blockDim.x;
+    if (rank != pivot) {
+        if (w < numWords) {
+            uint32_t tmp = matrix[rank*numWords + w];
+            matrix[rank*numWords + w] = matrix[pivot*numWords + w];
+            matrix[pivot*numWords + w] = tmp;
+        }
+        pivot = rank;
+    }
+
+       if (w == 0) {
+        eliminationKernel4<<<n, numWords, 0, cudaStreamTailLaunch>>>(matrix, n, numWords, rank, col);
+        }
+
+    }
+
+
+
+
+
 
 // KERNEL CUDA: elimina righe sotto il pivot
 
@@ -96,6 +106,9 @@ bool gaussianEliminationCuda4(uint32_t* h_matrix, int n, int k, uint8_t* solutio
 
     cudaMemcpy(d_matrix, h_matrix, n * numWords * sizeof(uint32_t), cudaMemcpyHostToDevice);
 
+    int t = 256;
+    int b = (numWords + t - 1) / t;
+
     for (int col = 0; col < vars && rank < n; col++)
     {
         int INF = n;
@@ -105,24 +118,17 @@ bool gaussianEliminationCuda4(uint32_t* h_matrix, int n, int k, uint8_t* solutio
         int threads = 256;
         int blocks = (n + threads - 1) / threads;
 
-        findPivotKernel<<<blocks, threads>>>(d_matrix, n, numWords, col, rank, d_pivot);
+        findPivotKernel4<<<blocks, threads>>>(d_matrix, n, numWords, col, rank, d_pivot);
         cudaDeviceSynchronize();
 
         int pivot;
         cudaMemcpy(&pivot, d_pivot, sizeof(int), cudaMemcpyDeviceToHost);
         if (pivot == n) continue;
-
-        // 2. SWAP
-        if (pivot != rank) {
-            int t = 256;
-            int b = (numWords + t - 1) / t;
-            swapRowsKernel<<<b, t>>>(d_matrix, numWords, rank, pivot);
-            cudaDeviceSynchronize();
-        }
-
-        // 3. ELIMINATION
-        eliminationKernel<<<n, numWords>>>(d_matrix, n, numWords, rank, col);
+        
+        
+        swapRowsKernel4<<<b, t>>>(d_matrix, numWords, rank, pivot, col, n);
         cudaDeviceSynchronize();
+
 
         rank++;
     }
@@ -135,7 +141,7 @@ bool gaussianEliminationCuda4(uint32_t* h_matrix, int n, int k, uint8_t* solutio
 
     // controllo se il sistema è risolvibile 
     for (int row = rank; row < n; row++) {
-        if (getBit(h_matrix, row, vars, numWords)) {
+        if (getBit4(h_matrix, row, vars, numWords)) {
             cudaFree(d_matrix); 
             return false; }
     }
@@ -152,7 +158,7 @@ bool gaussianEliminationCuda4(uint32_t* h_matrix, int n, int k, uint8_t* solutio
 
         for (int j = 0; j < vars; j++)
         {
-            if (getBit(h_matrix, i, j, numWords))
+            if (getBit4(h_matrix, i, j, numWords))
             {
                 pivotCol = j;
                 break;
@@ -162,11 +168,11 @@ bool gaussianEliminationCuda4(uint32_t* h_matrix, int n, int k, uint8_t* solutio
         if (pivotCol == -1)
             continue;
 
-        solution[pivotCol] = getBit(h_matrix, i, vars, numWords);
+        solution[pivotCol] = getBit4(h_matrix, i, vars, numWords);
 
         for (int j = pivotCol + 1; j < vars; j++)
         {
-            if (getBit(h_matrix, i, j, numWords))
+            if (getBit4(h_matrix, i, j, numWords))
                 solution[pivotCol] ^= solution[j];
         }
     }

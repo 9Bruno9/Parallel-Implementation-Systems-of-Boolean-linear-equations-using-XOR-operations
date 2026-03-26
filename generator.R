@@ -256,7 +256,7 @@ identical(data_p3$result, data_ser$result)
 identical(data_p4$result, data_ser$result)
 identical(data_p5$result, data_ser$result)
 
-identical(data_p5$result, data_p2$result)
+identical(data_p4$result, data_p3$result)
 
 
 ####COMPARISON P1######################################

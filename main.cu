@@ -15,7 +15,7 @@
 #include "parallel4.h"
 //#include "parallel5.h"
 
-#define N_TRY 5
+#define N_TRY 15
 
 int main(int argc, char *argv[]) {
     
@@ -45,7 +45,7 @@ int main(int argc, char *argv[]) {
 
     }
     else if(strcmp(input_string, "versione_p2") == 0){
-        csv_file = fopen("result_data/risultati_p2_05_05_3050.csv", "w");
+        csv_file = fopen("result_data/risultati_p2_05_15_3050.csv", "w");
         if (!csv_file) {
             perror("Errore nell'apertura del file CSV");
             return 1;
@@ -53,14 +53,14 @@ int main(int argc, char *argv[]) {
 
     }
     else if(strcmp(input_string, "versione_p3") == 0){
-        csv_file = fopen("result_data/risultati_p3_05_05_3050.csv", "w");
+        csv_file = fopen("result_data/risultati_p3_05_15_3050.csv", "w");
         if (!csv_file) {
             perror("Errore nell'apertura del file CSV");
             return 1;
         }
     }
     else if(strcmp(input_string, "versione_p4") == 0){
-        csv_file = fopen("result_data/risultati_p4_05_05_3050.csv", "w");
+        csv_file = fopen("result_data/risultati_p4_05_15_3050.csv", "w");
         if (!csv_file) {
             perror("Errore nell'apertura del file CSV");
             return 1;
@@ -98,7 +98,7 @@ int main(int argc, char *argv[]) {
             int k = n_values[i];
 
 
-            for(int z = 0; z<2; z++){
+            for(int z = 0; z<10; z++){
                 // Alloca la matrice
                 bool **matrix = (bool **)malloc(n * sizeof(bool *));
                 for (int x = 0; x < n; x++) {
