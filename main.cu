@@ -15,7 +15,7 @@
 #include "parallel4.h"
 //#include "parallel5.h"
 
-#define N_TRY 15
+#define N_TRY 20
 
 int main(int argc, char *argv[]) {
     
