@@ -8,7 +8,7 @@
 #include "parallel1.h"
 #include "parallel2.h"
 #include "parallel3.h"
-//#include "parallel4.h"
+#include "parallel4.h"
 //#include "parallel5.h"
 
 int main(int argc, char* argv[])
