@@ -78,3 +78,6 @@ clean:
 	rm -f *.o $(TARGETS)
 
 
+prova: prova.cu
+	nvcc -arch=sm_86 -rdc=true prova.cu -o prova
+	./prova

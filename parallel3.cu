@@ -106,7 +106,6 @@ bool gaussianEliminationCuda3(uint32_t* h_matrix, int n, int k, uint8_t* solutio
 
         int pivot;
         cudaMemcpy(&pivot, d_pivot, sizeof(int), cudaMemcpyDeviceToHost);
-
         if (pivot == n) continue;
 
         // 2. SWAP
