@@ -13,7 +13,7 @@
 #include "parallel2.h"
 #include "parallel3.h"
 #include "parallel4.h"
-//#include "parallel5.h"
+#include "parallel5.h"
 
 #define N_TRY 20
 
@@ -53,7 +53,7 @@ int main(int argc, char *argv[]) {
 
     }
     else if(strcmp(input_string, "versione_p3") == 0){
-        csv_file = fopen("result_data/risultati_p3_05_15_3050.csv", "w");
+        csv_file = fopen("result_data/risultati_p3_05_20_3050.csv", "w");
         if (!csv_file) {
             perror("Errore nell'apertura del file CSV");
             return 1;
@@ -67,7 +67,7 @@ int main(int argc, char *argv[]) {
         }
     }
     else if(strcmp(input_string, "versione_p5") == 0){
-        csv_file = fopen("result_data/risultati_p5_05_05_3050.csv", "w");
+        csv_file = fopen("result_data/risultati_p5_05_20_3050.csv", "w");
         if (!csv_file) {
             perror("Errore nell'apertura del file CSV");
             return 1;
@@ -75,7 +75,7 @@ int main(int argc, char *argv[]) {
     }
     else return 1;
 
-    double theta = 0.7;
+    double theta = 0.5;
 
     // Scrivi l'intestazione del file CSV
     fprintf(csv_file, "n,k,theta,tempo_esecuzione, result\n");
@@ -248,7 +248,7 @@ int main(int argc, char *argv[]) {
                             
                             printf("n=%d, k=%d, theta=%f, Tempo: %f secondi, Risultato: %d\n", n, k, theta, tempo_esecuzione, result);
                 }
-                /*else if(strcmp(input_string, "versione_p5") == 0){
+                else if(strcmp(input_string, "versione_p5") == 0){
                             
                             int numWords = (k + 31) / 32;
 
@@ -281,7 +281,7 @@ int main(int argc, char *argv[]) {
                             
                             
                             printf("p5 n=%d, k=%d, theta=%f, Tempo: %f secondi, Risultato: %d\n", n, k, theta, tempo_esecuzione, result);
-                }*/
+                }
                         for (int x = 0; x < n; x++)
                                 free(matrix[x]);
                         free(matrix);

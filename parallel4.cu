@@ -85,6 +85,7 @@ __global__ void swapRowsKernel4(uint32_t* matrix, int numWords, int rank, int pi
     if ((matrix[row*numWords + word] >> bit) & 1) {
         atomicMin(pivot, row); // prende il primo pivot valido
     }
+   
     
     if(row==n-1){
         swapRowsKernel4<<<numblock, 256, 0, cudaStreamTailLaunch>>>(matrix, numWords, startRow, *pivot, col, n);

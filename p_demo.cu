@@ -9,7 +9,7 @@
 #include "parallel2.h"
 #include "parallel3.h"
 #include "parallel4.h"
-//#include "parallel5.h"
+#include "parallel5.h"
 
 int main(int argc, char* argv[])
 {
@@ -217,7 +217,7 @@ int main(int argc, char* argv[])
 
         return 0;
     }
-    /*if(strcmp(input_string, "p5") == 0){
+    if(strcmp(input_string, "p5") == 0){
         int numWords = (k + 32 - 1) / 32;
 
         std::vector<uint32_t> matrix(n * numWords, 0);
@@ -260,6 +260,6 @@ int main(int argc, char* argv[])
 
 
         return 0;
-    }*/
+    }
 
 }
