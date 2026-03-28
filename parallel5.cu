@@ -32,23 +32,7 @@ inline void toggleBit5(uint32_t* matrix, int row, int col, int numWords)
     int bit = col % WORD_SIZE;
     matrix[row*numWords + word] ^= (1u << bit);
 }
-__global__ void findPivotKernel5(uint32_t* matrix, int n, int numWords,
-                               int col, int startRow, int* pivot)
-{
-    int tid = blockIdx.x * blockDim.x + threadIdx.x;
-    int stride = blockDim.x * gridDim.x;
 
-    int word = col / WORD_SIZE;
-    int bit = col % WORD_SIZE;
-
-    for (int row = tid; row < n; row += stride) {
-        if (row < startRow) continue;
-
-        if ((matrix[row*numWords + word] >> bit) & 1) {
-            atomicMin(pivot, row);
-        }
-    }
-}
 
 
 
@@ -70,11 +54,14 @@ __global__ void eliminationKernel5(uint32_t* matrix, int n, int numWords,
             }
         }
     }
+
 }
 
 __global__ void swapRowsKernel5(uint32_t* matrix, int numWords,
                               int rank, int pivot, int n, int col)
 {
+    if(pivot == n){return;}
+
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
     int stride = blockDim.x * gridDim.x;
 
@@ -85,9 +72,34 @@ __global__ void swapRowsKernel5(uint32_t* matrix, int numWords,
     }
 
     if (tid == 0) {
-        eliminationKernel5<<<n, numWords, 0, cudaStreamTailLaunch>>>(matrix, n, numWords, rank, col);
+        int threads = 256;
+        int blocks = (n + threads - 1) / threads;
+        eliminationKernel5<<<blocks, threads, 0, cudaStreamTailLaunch>>>(matrix, n, numWords, rank, col);
+        
         }
+}
 
+__global__ void findPivotKernel5(uint32_t* matrix, int n, int numWords,
+                               int col, int rank, int* pivot, int b, int t)
+{
+    int tid = blockIdx.x * blockDim.x + threadIdx.x;
+    int stride = blockDim.x * gridDim.x;
+
+    int word = col / WORD_SIZE;
+    int bit = col % WORD_SIZE;
+
+    for (int row = tid; row < n; row += stride) {
+        if (row < rank) continue;
+
+        if ((matrix[row*numWords + word] >> bit) & 1) {
+            atomicMin(pivot, row);
+        }
+    }
+
+if (blockIdx.x == 0 && threadIdx.x == 0) {
+    swapRowsKernel5<<<b, t, 0, cudaStreamTailLaunch>>>(
+        matrix, numWords, rank, *pivot, n, col);
+}
 }
 
 
@@ -106,8 +118,8 @@ bool gaussianEliminationCuda5(uint32_t* h_matrix, int n, int k, uint8_t* solutio
     cudaMalloc(&d_matrix, n * numWords * sizeof(uint32_t));
     cudaMalloc(&d_pivot, sizeof(int));
 
-    cudaMemcpy(d_matrix, h_matrix, n * numWords * sizeof(uint32_t), cudaMemcpyHostToDevice);
 
+    cudaMemcpy(d_matrix, h_matrix, n * numWords * sizeof(uint32_t), cudaMemcpyHostToDevice);
 
     int t = 256;
     int blocks = (n + t - 1) / t;
@@ -116,29 +128,24 @@ bool gaussianEliminationCuda5(uint32_t* h_matrix, int n, int k, uint8_t* solutio
     {
         int INF = n;
         cudaMemcpy(d_pivot, &INF, sizeof(int), cudaMemcpyHostToDevice);
-
+        
         // 1. FIND PIVOT
         
-
-        findPivotKernel5<<<blocks, t>>>(d_matrix, n, numWords, col, rank, d_pivot);
+        findPivotKernel5<<<blocks, t>>>(d_matrix, n, numWords, col, rank, d_pivot, b, t);
         cudaDeviceSynchronize();
-
         int pivot;
         cudaMemcpy(&pivot, d_pivot, sizeof(int), cudaMemcpyDeviceToHost);
-        if (pivot == n) continue;
-        
-        swapRowsKernel5<<<b, t>>>(d_matrix, numWords, rank, pivot, n, col);
 
-        cudaDeviceSynchronize();
-
-        rank++;
+        if (pivot != n) { rank++;}           
     }
 
     // copia finale UNA SOLA VOLTA
     cudaMemcpy(h_matrix, d_matrix, n*numWords*sizeof(uint32_t), cudaMemcpyDeviceToHost);
 
+
     cudaFree(d_matrix);
     cudaFree(d_pivot);
+
 
     // controllo se il sistema è risolvibile 
     for (int row = rank; row < n; row++) {

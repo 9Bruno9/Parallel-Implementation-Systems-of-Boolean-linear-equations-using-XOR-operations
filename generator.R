@@ -203,7 +203,7 @@ data_p2 <-data_p2 %>%
   group_by(n) %>%
   summarise(t_medio = mean(tempo_esecuzione))
 
-data_p3 <-read.csv("result_data/risultati_p3_05_15_3050.csv")
+data_p3 <-read.csv("result_data/risultati_p3_05_20_3050.csv")
 data_p3 <-data_p3 %>%
   group_by(n) %>%
   summarise(t_medio = mean(tempo_esecuzione))
@@ -225,8 +225,8 @@ data_p3  <- data_p3 %>% mutate(tipo = "p3")
 data_p4  <- data_p4 %>% mutate(tipo = "p4")
 data_p5  <- data_p5 %>% mutate(tipo = "p5")
 # Unisci i dataset
-data_all <- bind_rows(data_ser, data_p1, data_p2, data_p3)
-data_all <- bind_rows(data_ser, data_p5)
+data_all <- bind_rows(data_ser, data_p3, data_p5)
+data_all <- bind_rows(data_p3, data_p5)
 
 
 
