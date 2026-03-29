@@ -53,7 +53,7 @@ int main(int argc, char *argv[]) {
 
     }
     else if(strcmp(input_string, "versione_p3") == 0){
-        csv_file = fopen("result_data/risultati_p3_05_20_3050.csv", "w");
+        csv_file = fopen("result_data/risultati_p3_01_20_3050.csv", "w");
         if (!csv_file) {
             perror("Errore nell'apertura del file CSV");
             return 1;
@@ -67,7 +67,7 @@ int main(int argc, char *argv[]) {
         }
     }
     else if(strcmp(input_string, "versione_p5") == 0){
-        csv_file = fopen("result_data/risultati_p5_05_20_3050.csv", "w");
+        csv_file = fopen("result_data/risultati_p5_01_20_3050.csv", "w");
         if (!csv_file) {
             perror("Errore nell'apertura del file CSV");
             return 1;
@@ -75,7 +75,7 @@ int main(int argc, char *argv[]) {
     }
     else return 1;
 
-    double theta = 0.5;
+    double theta = 0.1;
 
     // Scrivi l'intestazione del file CSV
     fprintf(csv_file, "n,k,theta,tempo_esecuzione, result\n");
