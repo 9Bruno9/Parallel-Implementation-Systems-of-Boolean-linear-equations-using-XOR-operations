@@ -19,14 +19,22 @@
 
 
 // elimina righe sotto il pivot, ogni thread si occupa di una riga ed eventualmente esegue XOR
-__global__ void rowsElimination(uint8_t* matrix, int n,int k,int pivotRow,int pivotCol)
+__global__ void rowsElimination(uint8_t* matrix, int n, int k, int pivotRow, int pivotCol)
 {
-    int row = blockIdx.x * blockDim.x + threadIdx.x;
-    if (row > pivotRow && row < n) {
-        if (matrix[row*k + pivotCol])
+    int idx = blockIdx.x * blockDim.x + threadIdx.x;
+    int stride = blockDim.x * gridDim.x;
+
+    for (int row = idx; row < n; row += stride)
+    {
+        if (row > pivotRow)
         {
-            for (int j = pivotCol; j < k; j++)
-                matrix[row*k + j] ^= matrix[pivotRow*k + j];
+            if (matrix[row * k + pivotCol])
+            {
+                for (int j = pivotCol; j < k; j++)
+                {
+                    matrix[row * k + j] ^= matrix[pivotRow * k + j];
+                }
+            }
         }
     }
 }

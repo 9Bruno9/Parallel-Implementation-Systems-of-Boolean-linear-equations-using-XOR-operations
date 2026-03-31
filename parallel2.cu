@@ -37,16 +37,23 @@ inline void toggleBit(uint32_t* matrix, int row, int col, int numWords)
 // KERNEL CUDA: elimina righe sotto il pivot
 __global__ void rowsElimination2(uint32_t* matrix, int n, int numWords, int pivotRow, int pivotCol)
 {
-    int row = blockIdx.x * blockDim.x + threadIdx.x;
-    if (row > pivotRow && row < n) {
-        
-        int word = pivotCol / WORD_SIZE;
-        int bit = pivotCol % WORD_SIZE;
+    int idx = blockIdx.x * blockDim.x + threadIdx.x;
+    int stride = blockDim.x * gridDim.x;
 
-        if ((matrix[row*numWords + word] >> bit) & 1)
+    int word = pivotCol / WORD_SIZE;
+    int bit  = pivotCol % WORD_SIZE;
+
+    for (int row = idx; row < n; row += stride)
+    {
+        if (row > pivotRow)
         {
-            for (int w = word; w < numWords; w++)
-                matrix[row*numWords + w] ^= matrix[pivotRow*numWords + w];
+            if ((matrix[row * numWords + word] >> bit) & 1)
+            {
+                for (int w = word; w < numWords; w++)
+                {
+                    matrix[row * numWords + w] ^= matrix[pivotRow * numWords + w];
+                }
+            }
         }
     }
 }

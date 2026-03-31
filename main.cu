@@ -37,7 +37,7 @@ int main(int argc, char *argv[]) {
         }
     }
     else if(strcmp(input_string, "versione_p1") == 0){
-        csv_file = fopen("result_data/risultati_p1_05_05_3050.csv", "w");
+        csv_file = fopen("result_data/risultati_p1_01_20_3050.csv", "w");
         if (!csv_file) {
             perror("Errore nell'apertura del file CSV");
             return 1;
@@ -45,7 +45,7 @@ int main(int argc, char *argv[]) {
 
     }
     else if(strcmp(input_string, "versione_p2") == 0){
-        csv_file = fopen("result_data/risultati_p2_05_15_3050.csv", "w");
+        csv_file = fopen("result_data/risultati_p2_01_20_3050.csv", "w");
         if (!csv_file) {
             perror("Errore nell'apertura del file CSV");
             return 1;
@@ -60,7 +60,7 @@ int main(int argc, char *argv[]) {
         }
     }
     else if(strcmp(input_string, "versione_p4") == 0){
-        csv_file = fopen("result_data/risultati_p4_05_15_3050.csv", "w");
+        csv_file = fopen("result_data/risultati_p4_01_20_3050.csv", "w");
         if (!csv_file) {
             perror("Errore nell'apertura del file CSV");
             return 1;

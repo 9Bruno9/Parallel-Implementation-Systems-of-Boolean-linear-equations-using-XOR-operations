@@ -27,7 +27,7 @@ data_p3 <-data_p3 %>%
   group_by(n) %>%
   summarise(t_medio = mean(tempo_esecuzione))
 
-data_p4 <-read.csv("result_data/risultati_p4_01_15_3050.csv")
+data_p4 <-read.csv("result_data/risultati_p4_01_20_3050.csv")
 data_p4 <-data_p4 %>%
   group_by(n) %>%
   summarise(t_medio = mean(tempo_esecuzione))
@@ -44,7 +44,7 @@ data_p3  <- data_p3 %>% mutate(tipo = "p3")
 data_p4  <- data_p4 %>% mutate(tipo = "p4")
 data_p5  <- data_p5 %>% mutate(tipo = "p5")
 # Unisci i dataset
-data_all <- bind_rows(data_ser, data_p3 ,data_p5)
+data_all <- bind_rows(data_ser, data_p3 , data_p4,data_p5)
 
 
 
@@ -62,7 +62,7 @@ ggplot(data_all, aes(x = n^2, y = t_medio, color = tipo)) +
 
 
 #secondo plot
-data_all <- bind_rows(data_p3, data_p5)
+data_all <- bind_rows(data_p3, data_p4, data_p5)
 ggplot(data_all, aes(x = n^2, y = t_medio, color = tipo)) +
   geom_line(size = 1) +       
   #geom_point() +                

@@ -31,10 +31,12 @@ run_p5: tester
 	./tester versione_p5
 
 all: tester
-	./tester versione_seriale
+	#./tester versione_seriale
 	./tester versione_p1
 	./tester versione_p2
 	./tester versione_p3
+	./tester versione_p4
+	./tester versione_p5
 
 demo_ser: SerialeDemo.c
 	$(CC) -o SerialeDemo SerialeDemo.c seriale.o
