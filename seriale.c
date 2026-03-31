@@ -7,13 +7,14 @@
 
 bool gaussianElimination(int n, int k, bool **matrix, bool *solution) {
     int rank = 0;
+    int pivot = -1;
 
     for (int i = 0; i < k-1; i++) { solution[i] = false; }
 
 
     for (int col = 0; col < k-1 && rank < n; col++) { //scorre per colonna per cercare il pivot
         // Trova il pivot
-        int pivot = -1;
+        pivot = -1;
         for (int row = rank; row < n; row++) {
             if (matrix[row][col]) {
                 pivot = row;
@@ -53,8 +54,8 @@ bool gaussianElimination(int n, int k, bool **matrix, bool *solution) {
     }
 
     // Back substitution
+    int piv; 
     for (int i = rank - 1; i >= 0; i--) {
-        int piv;
         for(int m = 0; m < k; m++)
         {
             if(matrix[i][m])

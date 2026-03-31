@@ -16,6 +16,71 @@
 #include "parallel5.h"
 
 #define N_TRY 20
+#define CONTROL true
+
+
+
+bool check_solution_bool(bool **matrix, int n, int k, bool *solution) {
+    for (int i = 0; i < n; i++) {
+        bool sum = 0;
+
+        for (int j = 0; j < k-1; j++) {
+            sum ^= (matrix[i][j] & solution[j]);  // XOR mod 2
+        }
+
+        if (sum != matrix[i][k-1]) {
+            return false;  // errore trovato
+        }
+    }
+    return true;  // tutto ok
+}
+
+bool check_solution_p1(uint8_t *matrix, int n, int k, uint8_t *solution) {
+    for (int i = 0; i < n; i++) {
+        uint8_t sum = 0;
+
+        for (int j = 0; j < k - 1; j++) {
+            sum ^= (matrix[i * k + j] & solution[j]);  // mod 2
+        }
+
+        if (sum != matrix[i * k + (k - 1)]) {
+            return false;
+        }
+    }
+    return true;
+}
+
+
+
+bool check_solution_packed(uint32_t *matrix, int n, int k, uint8_t *solution) {
+    int numWords = (k + 31) / 32;
+
+    for (int i = 0; i < n; i++) {
+        int parity = 0;
+
+        for (int w = 0; w < numWords; w++) {
+            uint32_t row = matrix[i * numWords + w];
+            uint32_t sol_word = 0;
+
+            for (int b = 0; b < 32; b++) {
+                int j = w * 32 + b;
+                if (j < k - 1 && solution[j]) {
+                    sol_word |= (1u << b);
+                }
+            }
+
+            parity ^= __builtin_popcount(row & sol_word) % 2;
+        }
+
+        int expected = (matrix[i * numWords + (k - 1) / 32] >> ((k - 1) % 32)) & 1;
+
+        if (parity != expected)
+            return false;
+    }
+
+    return true;
+}
+
 
 int main(int argc, char *argv[]) {
     
@@ -30,7 +95,7 @@ int main(int argc, char *argv[]) {
     // Apri il file CSV per scrivere i risultati
     FILE *csv_file = NULL;
     if(strcmp(input_string, "versione_seriale") == 0){
-         csv_file = fopen("result_data/risultati_seriale_05_05_3050.csv", "w");
+         csv_file = fopen("result_data/prova_seriale.csv", "w");
         if (!csv_file) {
             perror("Errore nell'apertura del file CSV");
             return 1;
@@ -60,7 +125,7 @@ int main(int argc, char *argv[]) {
         }
     }
     else if(strcmp(input_string, "versione_p4") == 0){
-        csv_file = fopen("result_data/risultati_p4_01_20_3050.csv", "w");
+        csv_file = fopen("result_data/risultati_p4_prova.csv", "w");
         if (!csv_file) {
             perror("Errore nell'apertura del file CSV");
             return 1;
@@ -75,7 +140,7 @@ int main(int argc, char *argv[]) {
     }
     else return 1;
 
-    double theta = 0.1;
+    double theta = 0.6;
 
     // Scrivi l'intestazione del file CSV
     fprintf(csv_file, "n,k,theta,tempo_esecuzione, result\n");
@@ -98,7 +163,7 @@ int main(int argc, char *argv[]) {
             int k = n_values[i];
 
 
-            for(int z = 0; z<10; z++){
+            for(int z = 0; z<1; z++){
                 // Alloca la matrice
                 bool **matrix = (bool **)malloc(n * sizeof(bool *));
                 for (int x = 0; x < n; x++) {
@@ -118,8 +183,21 @@ int main(int argc, char *argv[]) {
                     tempo_esecuzione = ((double)(end - start)) / CLOCKS_PER_SEC;
 
                     // Scrivi i risultati sul file CSV
-                    fprintf(csv_file, "%d,%d,%f,%f,%d\n", n, k, theta, tempo_esecuzione, result);
+                    if(CONTROL == false){ fprintf(csv_file, "%d,%d,%f,%f,%d\n", n, k, theta, tempo_esecuzione, result);}
 
+                    if(CONTROL){
+                        bool check = true;
+
+                        if (result) {
+                            check = check_solution_bool(matrix, n, k, solution);
+                        } else {
+                            // sistema dichiarato non risolvibile → check "non applicabile"
+                            check = true;  // oppure usa -1 nel CSV
+                        }
+
+                        printf("Check: %s\n", check ? "OK" : "ERRORE");
+                        fprintf(csv_file, "%d,%d,%f,%f,%d,%d\n", n, k, theta, tempo_esecuzione, result, check);
+                    }
                     
 
                     printf("n=%d, k=%d, theta=%f, Tempo: %f secondi, Risultato: %d\n", n, k, theta, tempo_esecuzione, result);
@@ -137,9 +215,22 @@ int main(int argc, char *argv[]) {
                     end = clock();
                     tempo_esecuzione = ((double)(end - start)) / CLOCKS_PER_SEC;
                     
-                    // Scrivi i risultati sul file CSV
-                    fprintf(csv_file, "%d,%d,%f,%f,%d\n", n, k, theta, tempo_esecuzione, result);
-                    
+                    if(CONTROL == false){ fprintf(csv_file, "%d,%d,%f,%f,%d\n", n, k, theta, tempo_esecuzione, result);}
+
+                    if(CONTROL){
+                        bool check = true;
+
+                        if (result) {
+                            check = check_solution_p1(h_matrix, n, k, solution);
+                        } else {
+                            // sistema dichiarato non risolvibile → check "non applicabile"
+                            check = true;  // oppure usa -1 nel CSV
+                        }
+
+                        
+                        printf("Check: %s\n", check ? "OK" : "ERRORE");
+                        fprintf(csv_file, "%d,%d,%f,%f,%d,%d\n", n, k, theta, tempo_esecuzione, result, check);
+                    }
                     free(solution);
                     free(h_matrix);
                     
@@ -171,9 +262,22 @@ int main(int argc, char *argv[]) {
                     end = clock();
                     tempo_esecuzione = ((double)(end - start)) / CLOCKS_PER_SEC;
                     
-                    // Scrivi i risultati sul file CSV
-                    fprintf(csv_file, "%d,%d,%f,%f,%d\n", n, k, theta, tempo_esecuzione, result);
-                    
+                    if(CONTROL == false){ fprintf(csv_file, "%d,%d,%f,%f,%d\n", n, k, theta, tempo_esecuzione, result);}
+
+                    if(CONTROL){
+                        bool check = true;
+
+                        if (result) {
+                            check = check_solution_packed(h_matrix, n, k, solution);
+                        } else {
+                            // sistema dichiarato non risolvibile → check "non applicabile"
+                            check = true;  // oppure usa -1 nel CSV
+                        }
+
+                        printf("Check: %s\n", check ? "OK" : "ERRORE");
+                        fprintf(csv_file, "%d,%d,%f,%f,%d,%d\n", n, k, theta, tempo_esecuzione, result, check);
+                    }
+
                     free(solution);
                     free(h_matrix);
                     
@@ -205,9 +309,21 @@ int main(int argc, char *argv[]) {
                     end = clock();
                     tempo_esecuzione = ((double)(end - start)) / CLOCKS_PER_SEC;
                     
-                    // Scrivi i risultati sul file CSV
-                    fprintf(csv_file, "%d,%d,%f,%f,%d\n", n, k, theta, tempo_esecuzione, result);
-                    
+                    if(CONTROL == false){ fprintf(csv_file, "%d,%d,%f,%f,%d\n", n, k, theta, tempo_esecuzione, result);}
+
+                    if(CONTROL){
+                        bool check = true;
+
+                        if (result) {
+                            check = check_solution_packed(h_matrix, n, k, solution);
+                        } else {
+                            // sistema dichiarato non risolvibile → check "non applicabile"
+                            check = true;  // oppure usa -1 nel CSV
+                        }
+
+                        printf("Check: %s\n", check ? "OK" : "ERRORE");
+                        fprintf(csv_file, "%d,%d,%f,%f,%d,%d\n", n, k, theta, tempo_esecuzione, result, check);
+                    }
                     free(solution);
                     free(h_matrix);
                     
@@ -240,8 +356,20 @@ int main(int argc, char *argv[]) {
                             tempo_esecuzione = ((double)(end - start)) / CLOCKS_PER_SEC;
                             
                             // Scrivi i risultati sul file CSV
-                            fprintf(csv_file, "%d,%d,%f,%f,%d\n", n, k, theta, tempo_esecuzione, result);
-                            
+                           if(CONTROL == false){ fprintf(csv_file, "%d,%d,%f,%f,%d\n", n, k, theta, tempo_esecuzione, result);}
+
+                            if(CONTROL){
+                                bool check = true;
+
+                                if (result) {
+                                    check = check_solution_packed(h_matrix, n, k, solution);
+                                } else {
+                                    // sistema dichiarato non risolvibile → check "non applicabile"
+                                    check = true;  // oppure usa -1 nel CSV
+                                }
+                                printf("Check: %s\n", check ? "OK" : "ERRORE");
+                                fprintf(csv_file, "%d,%d,%f,%f,%d,%d\n", n, k, theta, tempo_esecuzione, result, check);
+                            }
                             free(solution);
                             free(h_matrix);
                             
@@ -274,8 +402,21 @@ int main(int argc, char *argv[]) {
                             tempo_esecuzione = ((double)(end - start)) / CLOCKS_PER_SEC;
                             
                             // Scrivi i risultati sul file CSV
-                            fprintf(csv_file, "%d,%d,%f,%f,%d\n", n, k, theta, tempo_esecuzione, result);
-                            
+                            if(CONTROL == false){ fprintf(csv_file, "%d,%d,%f,%f,%d\n", n, k, theta, tempo_esecuzione, result);}
+
+                            if(CONTROL){
+                                bool check = true;
+
+                                if (result) {
+                                    check = check_solution_packed(h_matrix, n, k, solution);
+                                } else {
+                                    // sistema dichiarato non risolvibile → check "non applicabile"
+                                    check = true;  // oppure usa -1 nel CSV
+                                }
+
+                                printf("Check: %s\n", check ? "OK" : "ERRORE");
+                                fprintf(csv_file, "%d,%d,%f,%f,%d,%d\n", n, k, theta, tempo_esecuzione, result, check);
+                            }
                             free(solution);
                             free(h_matrix);
                             
