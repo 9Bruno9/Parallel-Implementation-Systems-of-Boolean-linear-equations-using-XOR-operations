@@ -1,11 +1,20 @@
-# file oggetto
+# =========================
+# Build artifacts
+# =========================
 *.o
 
-# dataset
-cuda-keyring_1.1-1_all.deb
+# =========================
+# Executables / test files
+# =========================
 tester
 p_demo
-prova
-cuda-keyring_1.1-1_all.deb.1
-.Rhistory
 SerialeDemo
+
+# =========================
+# Dataset / package files
+# =========================
+
+# =========================
+# Temporary / duplicate files
+# =========================
+.Rhistory

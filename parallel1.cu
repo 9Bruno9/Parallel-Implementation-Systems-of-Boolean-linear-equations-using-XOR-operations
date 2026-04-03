@@ -43,13 +43,14 @@ bool gaussianEliminationCuda1(uint8_t* h_matrix, int n, int k, uint8_t* solution
 {
     int vars = k - 1;
     int rank = 0;
+    int pivot = -1; 
 
     uint8_t* d_matrix;
     CHECK(cudaMalloc(&d_matrix, n*k*sizeof(uint8_t)));
     CHECK(cudaMemcpy(d_matrix, h_matrix, n*k*sizeof(uint8_t), cudaMemcpyHostToDevice));
     for (int col = 0; col < vars && rank < n; col++)
     {
-        int pivot = -1;
+        pivot = -1;
         // Cerco pivot 
         for (int row = rank; row < n; row++)
         {
@@ -59,7 +60,7 @@ bool gaussianEliminationCuda1(uint8_t* h_matrix, int n, int k, uint8_t* solution
             }
         }
 
-        if (pivot == -1) {continue;}
+        if (pivot == -1) {continue;} //se non trova pivot colonna nulla
 
         // Scambio righe 
         if (pivot != rank)

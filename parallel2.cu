@@ -26,28 +26,21 @@ inline uint8_t getBit(uint32_t* matrix, int row, int col, int numWords)
     return (matrix[row*numWords + word] >> bit) & 1;
 }
 
-inline void toggleBit(uint32_t* matrix, int row, int col, int numWords)
-{
-    int word = col / WORD_SIZE;
-    int bit = col % WORD_SIZE;
-    matrix[row*numWords + word] ^= (1u << bit);
-}
 
-
-// KERNEL CUDA: elimina righe sotto il pivot
+// KERNEL CUDA: elimina righe sotto il pivot. Ogni thread processa una riga 
 __global__ void rowsElimination2(uint32_t* matrix, int n, int numWords, int pivotRow, int pivotCol)
 {
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
     int stride = blockDim.x * gridDim.x;
 
-    int word = pivotCol / WORD_SIZE;
-    int bit  = pivotCol % WORD_SIZE;
+    int word = pivotCol / WORD_SIZE; //word in corrispondeza della colonna pivot 
+    int bit  = pivotCol % WORD_SIZE; //cella della riga dopo il povit in corrispodenza della colonna del pivot
 
     for (int row = idx; row < n; row += stride)
     {
         if (row > pivotRow)
         {
-            if ((matrix[row * numWords + word] >> bit) & 1)
+            if ((matrix[row * numWords + word] >> bit) & 1) 
             {
                 for (int w = word; w < numWords; w++)
                 {
@@ -96,8 +89,6 @@ bool gaussianEliminationCuda2(uint32_t* h_matrix, int n, int k, uint8_t* solutio
             CHECK(cudaMemcpy(d_matrix, h_matrix, n * numWords * sizeof(uint32_t), cudaMemcpyHostToDevice));
         }
 
-        
-
         int threads = 256;
         int blocks = (n + threads - 1) / threads;
 
@@ -122,7 +113,7 @@ bool gaussianEliminationCuda2(uint32_t* h_matrix, int n, int k, uint8_t* solutio
     for (int i = 0; i < vars; i++)
         solution[i] = 0;
 
-    for (int i = rank - 1; i >= 0; i--)
+    for (int i = rank - 1; i >= 0; i--) //si scorre dall'ultima riga dominante (è presente un 1) verso la prima
     {
         int pivotCol = -1;
 
@@ -135,15 +126,13 @@ bool gaussianEliminationCuda2(uint32_t* h_matrix, int n, int k, uint8_t* solutio
             }
         }
 
-        if (pivotCol == -1)
-            continue;
+        if (pivotCol == -1) {continue;}
 
         solution[pivotCol] = getBit(h_matrix, i, vars, numWords);
 
         for (int j = pivotCol + 1; j < vars; j++)
         {
-            if (getBit(h_matrix, i, j, numWords))
-                solution[pivotCol] ^= solution[j];
+            if (getBit(h_matrix, i, j, numWords)) { solution[pivotCol] ^= solution[j]; }
         }
     }
 

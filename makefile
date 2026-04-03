@@ -1,85 +1,63 @@
-CC = gcc
-NVCC = nvcc
-TARGETS = tester SerialeDemo
+CC      = gcc
+NVCC    = nvcc
 
+ARCH    = -arch=sm_86
+NVFLAGS = $(ARCH) -rdc=true
 
-main: main.cu seriale.c matrix_generator.c p_demo.cu
-	gcc -c matrix_generator.c -o matrix_generator.o
-	gcc -c seriale.c -o seriale.o
-	nvcc -arch=sm_86 -rdc=true -c   parallel1.cu -o parallel1.o
-	nvcc -arch=sm_86 -rdc=true -c   parallel2.cu -o parallel2.o
-	nvcc -arch=sm_86 -rdc=true -c  parallel3.cu -o parallel3.o
-	nvcc -arch=sm_86 -rdc=true -c  parallel4.cu -o parallel4.o
-	nvcc -arch=sm_86 -rdc=true -c  parallel5.cu -o parallel5.o
-	$(NVCC) -arch=sm_86 -rdc=true -o tester main.cu seriale.o matrix_generator.o parallel1.o parallel2.o parallel3.o parallel4.o parallel5.o
-	$(NVCC) -arch=sm_86 -rdc=true -o p_demo p_demo.cu parallel1.o parallel2.o parallel3.o parallel4.o parallel5.o
-	
-run_seriale: tester
-	./tester versione_seriale	
+TARGET  = tester
+DEMO    = p_demo
 
-run_p1: tester
-	./tester versione_p1
+# File sorgenti
+C_SRCS  = seriale.c matrix_generator.c
+CU_SRCS = parallel1.cu parallel2.cu parallel3.cu parallel4.cu parallel5.cu
 
-run_p2: tester
-	./tester versione_p2
+# Object files
+C_OBJS  = $(C_SRCS:.c=.o)
+CU_OBJS = $(CU_SRCS:.cu=.o)
 
-run_p3: tester
-	./tester versione_p3
-run_p4: tester
-	./tester versione_p4
-run_p5: tester
-	./tester versione_p5
+# Default
+all: $(TARGET)
 
-all: tester
-	#./tester versione_seriale
-	./tester versione_p1
-	./tester versione_p2
-	./tester versione_p3
-	./tester versione_p4
-	./tester versione_p5
+# Build tester
+$(TARGET): main.cu $(C_OBJS) $(CU_OBJS)
+	$(NVCC) $(NVFLAGS) -o $@ $^
 
-demo_ser: SerialeDemo.c
-	$(CC) -o SerialeDemo SerialeDemo.c seriale.o
+# Build demo parallelo
+$(DEMO): p_demo.cu $(CU_OBJS)
+	$(NVCC) $(NVFLAGS) -o $@ $^
+
+# Regole generiche
+%.o: %.c
+	$(CC) -c $< -o $@
+
+%.o: %.cu
+	$(NVCC) $(NVFLAGS) -c $< -o $@
+
+# RUN
+run_seriale: $(TARGET)
+	./$(TARGET) versione_seriale
+
+run_p%: $(TARGET)
+	./$(TARGET) versione_p$*
+
+# Demo seriale
+demo_ser: SerialeDemo
 	./SerialeDemo ./test/test1.txt
 	./SerialeDemo ./test/test2.txt
 	./SerialeDemo ./test/test3.txt
 	./SerialeDemo ./test/test4.txt
 
-demo_p1: p_demo.cu
-	./p_demo ./test/test1.txt p1
-	./p_demo ./test/test2.txt p1
-	./p_demo ./test/test3.txt p1
-	./p_demo ./test/test4.txt p1
+SerialeDemo: SerialeDemo.c seriale.o
+	$(CC) -o $@ $^
 
-demo_p2: p_demo.cu
-	./p_demo ./test/test1.txt p2
-	./p_demo ./test/test2.txt p2
-	./p_demo ./test/test3.txt p2
-	./p_demo ./test/test4.txt p2
+# Demo paralleli generici
+demo_p%: $(DEMO)
+	./$(DEMO) ./test/test1.txt p$*
+	./$(DEMO) ./test/test2.txt p$*
+	./$(DEMO) ./test/test3.txt p$*
+	./$(DEMO) ./test/test4.txt p$*
 
-demo_p3: p_demo.cu
-	./p_demo ./test/test1.txt p3
-	./p_demo ./test/test2.txt p3
-	./p_demo ./test/test3.txt p3
-	./p_demo ./test/test4.txt p3
-	
-demo_p4: p_demo.cu
-	./p_demo ./test/test1.txt p4
-	./p_demo ./test/test2.txt p4
-	./p_demo ./test/test3.txt p4
-	./p_demo ./test/test4.txt p4
-
-demo_p5: p_demo.cu
-	./p_demo ./test/test1.txt p5
-	./p_demo ./test/test2.txt p5
-	./p_demo ./test/test3.txt p5
-	./p_demo ./test/test4.txt p5
-
-
+# Clean
 clean:
-	rm -f *.o $(TARGETS)
+	rm -f *.o $(TARGET) $(DEMO) SerialeDemo prova
 
-
-prova: prova.cu
-	nvcc -arch=sm_86 -rdc=true prova.cu -o prova
-	./prova
