@@ -16,7 +16,7 @@
 #include "parallel5.h"
 
 #define N_TRY 20
-#define CONTROL true
+#define CONTROL false
 #define REP 10
 
 
@@ -96,14 +96,14 @@ int main(int argc, char *argv[]) {
     // Apri il file CSV per scrivere i risultati
     FILE *csv_file = NULL;
     if(strcmp(input_string, "versione_seriale") == 0){
-         csv_file = fopen("result_data/risultati_seriale_07_20_3060.csv", "w");
+         csv_file = fopen("result_data/risultati_seriale_09_20_3060.csv", "w");
         if (!csv_file) {
             perror("Errore nell'apertura del file CSV");
             return 1;
         }
     }
     else if(strcmp(input_string, "versione_p1") == 0){
-        csv_file = fopen("result_data/risultati_p1_07_20_3060.csv", "w");
+        csv_file = fopen("result_data/risultati_p1_09_20_3060.csv", "w");
         if (!csv_file) {
             perror("Errore nell'apertura del file CSV");
             return 1;
@@ -111,7 +111,7 @@ int main(int argc, char *argv[]) {
 
     }
     else if(strcmp(input_string, "versione_p2") == 0){
-        csv_file = fopen("result_data/risultati_p2_07_20_3060.csv", "w");
+        csv_file = fopen("result_data/risultati_p2_09_20_3060.csv", "w");
         if (!csv_file) {
             perror("Errore nell'apertura del file CSV");
             return 1;
@@ -119,14 +119,14 @@ int main(int argc, char *argv[]) {
 
     }
     else if(strcmp(input_string, "versione_p3") == 0){
-        csv_file = fopen("result_data/risultati_p3_07_20_3060.csv", "w");
+        csv_file = fopen("result_data/risultati_p3_09_20_3060.csv", "w");
         if (!csv_file) {
             perror("Errore nell'apertura del file CSV");
             return 1;
         }
     }
     else if(strcmp(input_string, "versione_p4") == 0){
-        csv_file = fopen("result_data/risultati_p4_07_20_3060.csv", "w");
+        csv_file = fopen("result_data/risultati_p4_09_20_3060.csv", "w");
         if (!csv_file) {
             perror("Errore nell'apertura del file CSV");
             return 1;
@@ -141,7 +141,7 @@ int main(int argc, char *argv[]) {
     }
     else return 1;
 
-    double theta = 0.7;
+    double theta = 0.9;
 
     // Scrivi l'intestazione del file CSV
     fprintf(csv_file, "n,k,theta,tempo_esecuzione, result\n");
