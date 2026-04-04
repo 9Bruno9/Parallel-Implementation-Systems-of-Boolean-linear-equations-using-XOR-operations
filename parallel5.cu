@@ -8,6 +8,7 @@
 #include "parallel5.h"
 
 #define WORD_SIZE 32
+#define BLOCK_SIZE 256 
 
 #define CHECK(call) \
 { \
@@ -58,22 +59,39 @@ __global__ void swapRowsKernel5(uint32_t* matrix, int numWords,
 }
 
 __global__ void eliminationKernel5(uint32_t* matrix, int n, int numWords,
-                                 int pivotRow, int pivotCol)
+                                        int pivotRow, int pivotCol)
 {
-    int tid = blockIdx.x * blockDim.x + threadIdx.x;
-    int stride = blockDim.x * gridDim.x;
+    extern __shared__ uint32_t s_pivot[];
+
+    int tx = threadIdx.x; // word index
+    int ty = blockIdx.x;  // row index
+
+    int row = ty;
+
+    if (row <= pivotRow || row >= n) return;
 
     int word = pivotCol / WORD_SIZE;
-    int bit = pivotCol % WORD_SIZE;
+    int bit  = pivotCol % WORD_SIZE;
 
-    for (int row = tid; row < n; row += stride) {
-        if (row <= pivotRow) continue;
+    // 🔹 carico pivot row in shared memory (cooperativo)
+    for (int w = tx; w < numWords; w += blockDim.x) {
+        s_pivot[w] = matrix[pivotRow * numWords + w];
+    }
 
-        if ((matrix[row*numWords + word] >> bit) & 1) {
-            for (int w = 0; w < numWords; w++) {
-                matrix[row*numWords + w] ^= matrix[pivotRow*numWords + w];
-            }
-        }
+    __syncthreads();
+
+    // 🔹 controllo pivot bit (solo un thread per riga)
+    __shared__ int active;
+    if (tx == 0) {
+        active = (matrix[row*numWords + word] >> bit) & 1;
+    }
+    __syncthreads();
+
+    if (!active) return;
+
+    // 🔹 ogni thread lavora su UNA word
+    for (int w = tx; w < numWords; w += blockDim.x) {
+        matrix[row*numWords + w] ^= s_pivot[w];
     }
 }
 // KERNEL CUDA: elimina righe sotto il pivot
@@ -92,6 +110,8 @@ bool gaussianEliminationCuda5(uint32_t* h_matrix, int n, int k, uint8_t* solutio
     cudaMalloc(&d_pivot, sizeof(int));
 
     cudaMemcpy(d_matrix, h_matrix, n * numWords * sizeof(uint32_t), cudaMemcpyHostToDevice);
+    int t = 256;
+    int blocks = (n + t - 1) / t;
 
     for (int col = 0; col < vars && rank < n; col++)
     {
@@ -99,9 +119,6 @@ bool gaussianEliminationCuda5(uint32_t* h_matrix, int n, int k, uint8_t* solutio
         cudaMemcpy(d_pivot, &INF, sizeof(int), cudaMemcpyHostToDevice);
 
         // 1. FIND PIVOT
-        int t = 256;
-        int blocks = (n + t - 1) / t;
-
         findPivotKernel5<<<blocks, t>>>(d_matrix, n, numWords, col, rank, d_pivot);
         cudaDeviceSynchronize();
 
@@ -117,7 +134,7 @@ bool gaussianEliminationCuda5(uint32_t* h_matrix, int n, int k, uint8_t* solutio
         }
 
         // 3. ELIMINATION
-        eliminationKernel5<<<n, t>>>(d_matrix, n, numWords, rank, col);
+        eliminationKernel5<<<n, t, numWords * sizeof(uint32_t)>>>(d_matrix, n, numWords, rank, col);
         cudaDeviceSynchronize();
 
         rank++;
