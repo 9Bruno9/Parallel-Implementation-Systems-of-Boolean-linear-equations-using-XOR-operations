@@ -92,16 +92,14 @@ bool gaussianEliminationCuda3(uint32_t* h_matrix, int n, int k, uint8_t* solutio
     cudaMalloc(&d_pivot, sizeof(int));
 
     cudaMemcpy(d_matrix, h_matrix, n * numWords * sizeof(uint32_t), cudaMemcpyHostToDevice);
-
+    int t = 256;
+    int blocks = (n + t - 1) / t;
     for (int col = 0; col < vars && rank < n; col++)
     {
         int INF = n;
         cudaMemcpy(d_pivot, &INF, sizeof(int), cudaMemcpyHostToDevice);
 
         // 1. FIND PIVOT
-        int t = 256;
-        int blocks = (n + t - 1) / t;
-
         findPivotKernel<<<blocks, t>>>(d_matrix, n, numWords, col, rank, d_pivot);
         cudaDeviceSynchronize();
 
