@@ -126,7 +126,7 @@ int main(int argc, char *argv[]) {
         }
     }
     else if(strcmp(input_string, "versione_p4") == 0){
-        csv_file = fopen("result_data/risultati_p4_09_20_3060.csv", "w");
+        csv_file = fopen("result_data/risultati_p4_01_20_3050.csv", "w");
         if (!csv_file) {
             perror("Errore nell'apertura del file CSV");
             return 1;
@@ -141,7 +141,7 @@ int main(int argc, char *argv[]) {
     }
     else return 1;
 
-    double theta = 0.9;
+    double theta = 0.1;
 
     // Scrivi l'intestazione del file CSV
     fprintf(csv_file, "n,k,theta,tempo_esecuzione, result\n");
