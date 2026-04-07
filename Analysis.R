@@ -589,6 +589,7 @@ data_s1 <- read.csv("result_data/risultati_p4_01_20_3060.csv")
 data_s2 <-  read.csv("result_data/risultati_p4_03_20_3060.csv")
 data_s3 <-  read.csv("result_data/risultati_p4_05_20_3060.csv")
 data_s4 <-  read.csv("result_data/risultati_p4_07_20_3060.csv")
+data_s5 <-  read.csv("result_data/risultati_p4_09_20_3060.csv")
 
 data_s1 <-data_s1 %>%
   group_by(n) %>%
@@ -605,9 +606,12 @@ data_s3 <-data_s3 %>%
 data_s4 <-data_s4 %>%
   group_by(n) %>%
   summarise(t_medio = mean(tempo_esecuzione), theta = as.factor(theta))
+data_s5 <-data_s5 %>%
+  group_by(n) %>%
+  summarise(t_medio = mean(tempo_esecuzione), theta = as.factor(theta))
 
 
-data_all <- bind_rows(data_s1, data_s2, data_s3, data_s4)
+data_all <- bind_rows(data_s1, data_s2, data_s3, data_s4, data_s5)
 
 ggplot(data_all, aes(x = n^2, y = t_medio, color = theta)) +
   geom_line(size = 1) +       
@@ -656,7 +660,7 @@ process_type <- function(type, thetas) {
 
 # Elenco dei tipi e dei valori di theta
 types <- c("seriale", "p1", "p2", "p3", "p4")
-thetas <- c("01", "03", "05","07")
+thetas <- c("01", "03", "05","07", "09")
 
 # Processa tutti i tipi e combina i risultati
 all_data <- map_dfr(types, ~ process_type(.x, thetas))
