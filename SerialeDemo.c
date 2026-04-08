@@ -14,6 +14,7 @@ void printSolution(bool *solution, int n, int k) {
     for (int i = 0; i < k-1; i++) {
         printf("x%d = %d\n", i + 1, solution[i]);
     }
+    printf("\n\n");
 }
 
 
@@ -44,7 +45,7 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-
+    printf("Uso: %s  \n", argv[1]);
 
     // Leggi il file per determinare n e k
     char line[100 * 2 + 2]; // Buffer per leggere ogni riga
@@ -90,7 +91,7 @@ int main(int argc, char *argv[]) {
     bool *solution = malloc((k-1) * sizeof(bool));
 
     if (!gaussianElimination(n, k, matrice, solution)) {
-        printf("sistema irrisolvibile \n");
+        printf("sistema irrisolvibile \n\n\n");
         return 0;
     }
 
