@@ -1,5 +1,10 @@
 library(tidyverse)
 library(here)
+
+library(dplyr)
+library(tidyr)
+library(knitr)
+library(kableExtra)
 setwd(here())
 
 
@@ -292,6 +297,19 @@ process_type <- function(type, thetas) {
   return(combined)
 }
 
+
+create_time_table <- function(data) {
+  data %>%
+    group_by(tipo, n) %>%
+    summarise(t_medio = mean(t_medio), .groups = "drop") %>%
+    pivot_wider(
+      names_from = tipo,
+      values_from = t_medio
+    ) %>%
+    arrange(n)
+}
+
+
 # Elenco dei tipi e dei valori di theta
 types <- c("seriale", "p1", "p2", "p3", "p4", "p5")
 # types <- c("p3", "p4", "p5")
@@ -331,23 +349,73 @@ library(tidyverse)
 library(here)
 
 setwd(here())
+
 rm(list=ls())
+
 process_file <- function(file_path) {
   read.csv(file_path) %>%
     group_by(n) %>%
     summarise(t_medio = mean(tempo_esecuzione), .groups = "drop")
 }
 
-types  <- c( "p3", "p4", "p5")#c("seriale","p1", "p2", "p3", "p4", "p5")
-thetas <- c("05", "07", "09")
+types  <- c("seriale","p1", "p2", "p3", "p4", "p5")#c( "p3", "p4", "p5")
+thetas <- c("01","03","05", "07", "09")
 
 data_all <- expand_grid(tipo = types, theta = thetas) %>%
-  mutate(file = paste0("result_data/risultati_", tipo, "_", theta, "_30_3060.csv")) %>%
+  mutate(file = paste0("result_data/risultati_", tipo, "_", theta, "_20_3060.csv")) %>%
   filter(file.exists(file)) %>%
   pmap_dfr(function(tipo, theta, file) {
     process_file(file) %>%
       mutate(tipo = tipo, theta = theta)
   })
+
+create_latex_table <- function(data, caption = "Tempi medi", label = "tab:tempi") {
+
+  
+  table <- data %>%
+    group_by(tipo, n) %>%
+    summarise(t_medio = mean(t_medio), .groups = "drop") %>%
+    pivot_wider(names_from = tipo, values_from = t_medio) %>%
+    arrange(n)
+  
+  # 🔥 FORMATTAZIONE + BOLD DEL MINIMO PER RIGA
+  table_fmt <- table %>%
+    rowwise() %>%
+    mutate(
+      min_val = min(c_across(-n), na.rm = TRUE),
+      across(
+        -c(n, min_val),
+        ~ ifelse(. == min_val,
+                 paste0("\\textbf{", sprintf("%.4f", .), "}"),
+                 sprintf("%.4f", .))
+      )
+    ) %>%
+    ungroup() %>%
+    select(-min_val)
+  
+  table_fmt %>%
+    kable(
+      format = "latex",
+      booktabs = TRUE,
+      escape = FALSE,  # 🔥 IMPORTANTISSIMO per il bold
+      caption = caption,
+      label = label
+    ) %>%
+    kable_styling(latex_options = c("hold_position"))
+}
+latex_tabella <- create_latex_table(
+  data_all,
+  caption = "Tempo medio di esecuzione per ogni versione (media su tutti i theta)",
+  label = "tab:tempi_versioni"
+)
+
+cat(latex_tabella)
+
+
+tabella_tempi <- create_time_table(data_all)
+
+print(tabella_tempi)
+
 
 # 🔥 MEDIA SU TUTTI I THETA
 data_mean <- data_all %>%
@@ -361,7 +429,7 @@ ggplot(data_mean, aes(x = n^2, y = t_medio, color = tipo)) +
     x = "n^2",
     y = "Tempo medio di esecuzione",
     color = "Tipo",
-    title = "Tempo di esecuzione medio per ogni versione (media su tutti i theta) \n| Intel Core i7 5820K | NVIDIA GeForce RTX 3060"
+    title = "Tempo di esecuzione medio per ogni versione (media su tutti i theta) \n| AMD Ryzen 7 5800H | NVIDIA GeForce RTX 3050 Ti Laptop GPU"
   ) +
   theme_minimal(base_size = 14)
 
@@ -373,7 +441,7 @@ ggplot(data_all, aes(x = n^2, y = t_medio, color = tipo)) +
     x = "n^2",
     y = "Tempo medio di esecuzione",
     color = "Tipo",
-    title = "Tempo medio di esecuzione per ogni versione e per ogni theta \n| Intel Core i7 5820K | NVIDIA GeForce RTX 3060"
+    title = "Tempo medio di esecuzione per ogni versione e per ogni theta \n| AMD Ryzen 7 5800H | NVIDIA GeForce RTX 3050 Ti Laptop GPU"
   ) +
   theme_minimal(base_size = 14)
 
@@ -393,10 +461,10 @@ check_results <- function(theta) {
 check_results("09")
 
 check_results3_5 <- function(theta) {
-  base <- read.csv(paste0("result_data/risultati_p3_",theta,"_30_3060.csv"))
+  base <- read.csv(paste0("result_data/risultati_p3_",theta,"_30_3050.csv"))
   
   map(types[-1], function(t) {
-    df <- read.csv(paste0("result_data/risultati_", t, "_", theta, "_30_3060.csv"))
+    df <- read.csv(paste0("result_data/risultati_", t, "_", theta, "_30_3050.csv"))
     identical(df$result, base$result)
   })
 }

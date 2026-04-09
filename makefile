@@ -21,9 +21,9 @@ run_p%: tester
 	./tester versione_p$*
 
 run_all: tester
-	./tester versione_seriale
-	./tester versione_p1
-	./tester versione_p2
+	#./tester versione_seriale
+	#./tester versione_p1
+	#./tester versione_p2
 	./tester versione_p3
 	./tester versione_p4
 	./tester versione_p5
