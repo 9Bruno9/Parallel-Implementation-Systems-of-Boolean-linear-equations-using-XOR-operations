@@ -73,14 +73,14 @@ __global__ void eliminationKernel5(uint32_t* matrix, int n, int numWords,
     int word = pivotCol / WORD_SIZE;
     int bit  = pivotCol % WORD_SIZE;
 
-    // 🔹 carico pivot row in shared memory (cooperativo)
+    // carico pivot row in shared memory (cooperativo)
     for (int w = tx; w < numWords; w += blockDim.x) {
         s_pivot[w] = matrix[pivotRow * numWords + w];
     }
 
     __syncthreads();
 
-    // 🔹 controllo pivot bit (solo un thread per riga)
+    // controllo pivot bit (solo un thread per riga)
     __shared__ int active;
     if (tx == 0) {
         active = (matrix[row*numWords + word] >> bit) & 1;
@@ -89,13 +89,11 @@ __global__ void eliminationKernel5(uint32_t* matrix, int n, int numWords,
 
     if (!active) return;
 
-    // 🔹 ogni thread lavora su UNA word
+    //  ogni thread lavora su UNA word
     for (int w = tx; w < numWords; w += blockDim.x) {
         matrix[row*numWords + w] ^= s_pivot[w];
     }
 }
-// KERNEL CUDA: elimina righe sotto il pivot
-
 
 bool gaussianEliminationCuda5(uint32_t* h_matrix, int n, int k, uint8_t* solution)
 {

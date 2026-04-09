@@ -36,6 +36,7 @@ L’approccio adottato si basa su una variante dell’algoritmo di Gauss-Jordan 
 
 ## 🔧 Compilazione
 
+Le istruzioni di compilazioni dettagliate sono fornite nell'appendice del report (PDF)
 Per compilare l’intero progetto:
 
 ```bash

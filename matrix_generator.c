@@ -13,7 +13,7 @@ void matrix_generator(int n, int k, double theta, bool **matrix) {
         }
     }
 
-    // Assicura che nessuna colonna sia tutta zeros
+    // Assicura che nessuna colonna sia tutta zero
     for (int j = 0; j < k; j++) {
         bool all_zeros = true;
         for (int i = 0; i < n; i++) {
