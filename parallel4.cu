@@ -9,8 +9,6 @@
 
 #define WORD_SIZE 32
 
-
-
 // Accesso ai bit
 inline uint8_t getBit4(uint32_t* matrix, int row, int col, int numWords)
 {
@@ -104,9 +102,6 @@ __global__ void resetPivot4(uint32_t* matrix, int n, int numWords,
      findPivotKernel4<<<blocks, t, 0, cudaStreamTailLaunch>>>(matrix, n, numWords, col, rank, pivot, b, t);
    }
 }
-
-// KERNEL CUDA: elimina righe sotto il pivot
-
 
 bool gaussianEliminationCuda4(uint32_t* h_matrix, int n, int k, uint8_t* solution)
 {

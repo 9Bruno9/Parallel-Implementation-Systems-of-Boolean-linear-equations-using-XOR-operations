@@ -27,7 +27,7 @@ inline uint8_t getBit(uint32_t* matrix, int row, int col, int numWords)
 }
 
 
-// KERNEL CUDA: elimina righe sotto il pivot. Ogni thread processa una riga 
+// elimina righe sotto il pivot. Ogni thread processa una riga 
 __global__ void rowsElimination2(uint32_t* matrix, int n, int numWords, int pivotRow, int pivotCol)
 {
     int idx = blockIdx.x * blockDim.x + threadIdx.x;

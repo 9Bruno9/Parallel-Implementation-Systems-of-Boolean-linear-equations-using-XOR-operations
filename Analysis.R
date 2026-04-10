@@ -9,10 +9,6 @@ setwd(here())
 
 
 ###VISUALIZZAZIONI E TABELLE ###############
-library(tidyverse)
-library(here)
-
-setwd(here())
 
 rm(list=ls())
 
@@ -22,7 +18,7 @@ process_file <- function(file_path) {
     summarise(t_medio = mean(tempo_esecuzione), .groups = "drop")
 }
 
-types  <- c( "p3", "p4", "p5")#c("seriale","p1", "p2", "p3", "p4", "p5")
+types  <- c("seriale","p1", "p2", "p3", "p4", "p5")#c( "p3", "p4", "p5")
 thetas <- c("01","03","05", "07", "09")
 
 data_all <- expand_grid(tipo = types, theta = thetas) %>%
@@ -43,7 +39,7 @@ create_latex_table <- function(data, caption = "Tempi medi", label = "tab:tempi"
     pivot_wider(names_from = tipo, values_from = t_medio) %>%
     arrange(n)
   
-  # 🔥 FORMATTAZIONE + BOLD DEL MINIMO PER RIGA
+  # 
   table_fmt <- table %>%
     rowwise() %>%
     mutate(
@@ -62,7 +58,7 @@ create_latex_table <- function(data, caption = "Tempi medi", label = "tab:tempi"
     kable(
       format = "latex",
       booktabs = TRUE,
-      escape = FALSE,  # 🔥 IMPORTANTISSIMO per il bold
+      escape = FALSE,  
       caption = caption,
       label = label
     ) %>%
@@ -113,10 +109,10 @@ ggplot(data_all, aes(x = n^2, y = t_medio, color = tipo)) +
 
 
 check_results <- function(theta) {
-  base <- read.csv(paste0("result_data/risultati_seriale_", theta, "_40_3060.csv"))
+  base <- read.csv(paste0("result_data/risultati_seriale_", theta, "_5_3050.csv"))
   
   map(types[-1], function(t) {
-    df <- read.csv(paste0("result_data/risultati_", t, "_", theta, "_40_3060.csv"))
+    df <- read.csv(paste0("result_data/risultati_", t, "_", theta, "_5_3050.csv"))
     identical(df$result, base$result)
   })
 }
@@ -124,10 +120,10 @@ check_results <- function(theta) {
 check_results("09")
 
 check_results3_5 <- function(theta) {
-  base <- read.csv(paste0("result_data/risultati_p3_",theta,"_40_3060.csv"))
+  base <- read.csv(paste0("result_data/risultati_p3_",theta,"_10_3050.csv"))
   
   map(types[-1], function(t) {
-    df <- read.csv(paste0("result_data/risultati_", t, "_", theta, "_40_3060.csv"))
+    df <- read.csv(paste0("result_data/risultati_", t, "_", theta, "_10_3050.csv"))
     identical(df$result, base$result)
   })
 }

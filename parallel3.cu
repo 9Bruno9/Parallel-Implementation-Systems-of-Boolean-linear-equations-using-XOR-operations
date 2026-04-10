@@ -76,8 +76,6 @@ __global__ void eliminationKernel(uint32_t* matrix, int n, int numWords,
         }
     }
 }
-// KERNEL CUDA: elimina righe sotto il pivot
-
 
 bool gaussianEliminationCuda3(uint32_t* h_matrix, int n, int k, uint8_t* solution)
 {
