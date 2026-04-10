@@ -9,14 +9,7 @@
 
 #define WORD_SIZE 32
 
-#define CHECK(call) \
-{ \
-    cudaError_t err = call; \
-    if (err != cudaSuccess) { \
-        printf("CUDA Error: %s\n", cudaGetErrorString(err)); \
-        exit(1); \
-    } \
-}
+
 
 // Accesso ai bit
 inline uint8_t getBit4(uint32_t* matrix, int row, int col, int numWords)

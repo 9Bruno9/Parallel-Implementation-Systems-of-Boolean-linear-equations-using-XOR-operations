@@ -15,8 +15,8 @@
 #include "parallel4.h"
 #include "parallel5.h"
 
-#define N_TRY 30
-#define CONTROL true
+#define N_TRY 5
+#define CONTROL false
 #define REP 10
 
 
@@ -102,7 +102,7 @@ int main(int argc, char *argv[]) {
             return 1;
         }
     }
-    else if(strcmp(input_string, "versione_p1_01_40_3050") == 0){
+    else if(strcmp(input_string, "versione_p1") == 0){
         csv_file = fopen("result_data/risultati_p1", "w");
         if (!csv_file) {
             perror("Errore nell'apertura del file CSV");
@@ -119,21 +119,21 @@ int main(int argc, char *argv[]) {
 
     }
     else if(strcmp(input_string, "versione_p3") == 0){
-        csv_file = fopen("result_data/risultati_p3_09_30_3050.csv", "w");
+        csv_file = fopen("result_data/risultati_p3.csv", "w");
         if (!csv_file) {
             perror("Errore nell'apertura del file CSV");
             return 1;
         }
     }
     else if(strcmp(input_string, "versione_p4") == 0){
-        csv_file = fopen("result_data/risultati_p4_09_30_3050.csv", "w");
+        csv_file = fopen("result_data/risultati_p4.csv", "w");
         if (!csv_file) {
             perror("Errore nell'apertura del file CSV");
             return 1;
         }
     }
     else if(strcmp(input_string, "versione_p5") == 0){
-        csv_file = fopen("result_data/risultati_p5_09_30_3050.csv", "w");
+        csv_file = fopen("result_data/risultati_p5.csv", "w");
         if (!csv_file) {
             perror("Errore nell'apertura del file CSV");
             return 1;

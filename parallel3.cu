@@ -121,7 +121,7 @@ bool gaussianEliminationCuda3(uint32_t* h_matrix, int n, int k, uint8_t* solutio
         rank++;
     }
 
-    // copia finale UNA SOLA VOLTA
+    // copia finale 
     cudaMemcpy(h_matrix, d_matrix, n*numWords*sizeof(uint32_t), cudaMemcpyDeviceToHost);
 
     cudaFree(d_matrix);
