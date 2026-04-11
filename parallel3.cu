@@ -128,7 +128,6 @@ bool gaussianEliminationCuda3(uint32_t* h_matrix, int n, int k, uint8_t* solutio
     // controllo se il sistema è risolvibile 
     for (int row = rank; row < n; row++) {
         if (getBit(h_matrix, row, vars, numWords)) {
-            cudaFree(d_matrix); 
             return false; }
     }
    
@@ -163,6 +162,5 @@ bool gaussianEliminationCuda3(uint32_t* h_matrix, int n, int k, uint8_t* solutio
         }
     }
 
-    cudaFree(d_matrix);
     return true;
 }

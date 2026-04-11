@@ -84,11 +84,10 @@ bool gaussianEliminationCuda1(uint8_t* h_matrix, int n, int k, uint8_t* solution
         CHECK(cudaMemcpy(h_matrix, d_matrix, n*k*sizeof(uint8_t),cudaMemcpyDeviceToHost));
         rank++;
     }
-
+    cudaFree(d_matrix); 
     //controllo esistano soluzioni
     for (int row = rank; row < n; row++) {
         if (h_matrix[row*k+k-1]) {
-            cudaFree(d_matrix); 
             return false; }
     }
 
@@ -120,6 +119,5 @@ bool gaussianEliminationCuda1(uint8_t* h_matrix, int n, int k, uint8_t* solution
         }
     }
 
-    cudaFree(d_matrix);
     return true;
 }

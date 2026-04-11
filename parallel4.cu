@@ -145,12 +145,11 @@ bool gaussianEliminationCuda4(uint32_t* h_matrix, int n, int k, uint8_t* solutio
 
     cudaFree(d_pivot);
     cudaFree(d_rank);
-
+    cudaFree(d_matrix); 
 
     // controllo se il sistema è risolvibile 
     for (int row = rank; row < n; row++) {
         if (getBit4(h_matrix, row, vars, numWords)) {
-            cudaFree(d_matrix); 
             return false; }
     }
    
@@ -185,6 +184,5 @@ bool gaussianEliminationCuda4(uint32_t* h_matrix, int n, int k, uint8_t* solutio
         }
     }
 
-    cudaFree(d_matrix);
     return true;
 }
