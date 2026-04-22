@@ -1,4 +1,4 @@
-TARGETS = tester SerialeDemo
+TARGETS = tester SerialeDemo p_demo
 TESTS = ./test/test1.txt ./test/test2.txt ./test/test3.txt ./test/test4.txt
 
 

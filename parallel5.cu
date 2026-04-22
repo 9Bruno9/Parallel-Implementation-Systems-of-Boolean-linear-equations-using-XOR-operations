@@ -87,6 +87,8 @@ __global__ void eliminationKernel5(uint32_t* matrix, int n, int numWords,
     }
 }
 
+
+
 bool gaussianEliminationCuda5(uint32_t* h_matrix, int n, int k, uint8_t* solution)
 {
     int vars = k - 1;
