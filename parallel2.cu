@@ -33,8 +33,8 @@ __global__ void rowsElimination2(uint32_t* matrix, int n, int numWords, int pivo
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
     int stride = blockDim.x * gridDim.x;
 
-    int word = pivotCol / WORD_SIZE; //word in corrispondeza della colonna pivot 
-    int bit  = pivotCol % WORD_SIZE; //cella della riga dopo il povit in corrispodenza della colonna del pivot
+    int word = pivotCol / WORD_SIZE; //word in corrispondenza della colonna pivot 
+    int bit  = pivotCol % WORD_SIZE; //cella della riga dopo il pivot in corrispodenza della colonna del pivot
 
     for (int row = idx; row < n; row += stride)
     {

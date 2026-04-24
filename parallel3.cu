@@ -23,7 +23,7 @@ inline uint8_t getBit(uint32_t* matrix, int row, int col, int numWords)
 {
     int word = col / WORD_SIZE;
     int bit = col % WORD_SIZE;
-    return (matrix[row*numWords + word] >> bit) & 1; //controllo se un determinato bit è 1 
+    return (matrix[row*numWords + word] >> bit) & 1; //controllo se un determinato bit è 1, porto il bit che mi interssa tutto più a destra e faccio un AND con 1 per verificare se è effettivamente 1
 }
 
 __global__ void findPivotKernel(uint32_t* matrix, int n, int numWords,

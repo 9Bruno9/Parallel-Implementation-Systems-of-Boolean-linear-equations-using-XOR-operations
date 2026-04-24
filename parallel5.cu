@@ -56,9 +56,7 @@ __global__ void eliminationKernel5(uint32_t* matrix, int n, int numWords,
     extern __shared__ uint32_t s_pivot[];
 
     int tx = threadIdx.x; // word index
-    int ty = blockIdx.x;  // row index
-
-    int row = ty;
+    int row = blockIdx.x;  // row index
 
     if (row <= pivotRow || row >= n) return;
 
@@ -81,7 +79,7 @@ __global__ void eliminationKernel5(uint32_t* matrix, int n, int numWords,
 
     if (!active) return;
 
-    //  ogni thread lavora su UNA word
+    //  ogni thread lavora su UNA word, grid stride loops per la stessa riga (sulle colonne)
     for (int w = tx; w < numWords; w += blockDim.x) {
         matrix[row*numWords + w] ^= s_pivot[w];
     }
@@ -125,7 +123,7 @@ bool gaussianEliminationCuda5(uint32_t* h_matrix, int n, int k, uint8_t* solutio
             cudaDeviceSynchronize();
         }
 
-        // 3. ELIMINATION
+        // 3. ELIMINATION: se n molto grande (n>> della capacità degli SM) l'esecuzine viene garantita ma molto lentamente
         eliminationKernel5<<<n, t, numWords * sizeof(uint32_t)>>>(d_matrix, n, numWords, rank, col);
         cudaDeviceSynchronize();
 
